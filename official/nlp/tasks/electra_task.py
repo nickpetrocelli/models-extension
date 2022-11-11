@@ -44,23 +44,23 @@ class ElectraPretrainConfig(cfg.TaskConfig):
   train_data: cfg.DataConfig = cfg.DataConfig()
   validation_data: cfg.DataConfig = cfg.DataConfig()
 
-  # Custom metric for tracking EMR.
-  class EffectiveMaskRateMetric(tf.keras.metrics.Metric):
-    """
-    Custom metric for tracking EMR. 
-    Method: keep track of how many labels are positive for rtd task.
-    """
-    def __init__(self, mask_prob):
-      self._num_pos = self.add_weight(shape=(0,), dtype=tf.float32)
-      self._num_tot = self.add_weight(shape=(0,), dtype=tf.float32)
+# Custom metric for tracking EMR.
+class EffectiveMaskRateMetric(tf.keras.metrics.Metric):
+  """
+  Custom metric for tracking EMR. 
+  Method: keep track of how many labels are positive for rtd task.
+  """
+  def __init__(self, mask_prob):
+    self._num_pos = self.add_weight(shape=(0,), dtype=tf.float32)
+    self._num_tot = self.add_weight(shape=(0,), dtype=tf.float32)
 
-    def update_state(self, rtd_labels):
-      flat_labels = tf.reshape(rtd_labels, [-1])
-      self._num_pos.assign_add(tf.math.reduce_sum(flat_labels))
-      self._num_tot.assign_add(tf.size(flat_labels)) 
+  def update_state(self, rtd_labels):
+    flat_labels = tf.reshape(rtd_labels, [-1])
+    self._num_pos.assign_add(tf.math.reduce_sum(flat_labels))
+    self._num_tot.assign_add(tf.size(flat_labels)) 
 
-    def result(self):
-      return self._num_pos / self._num_tot
+  def result(self):
+    return self._num_pos / self._num_tot
 
 
 def _build_pretrainer(
