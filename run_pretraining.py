@@ -142,7 +142,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     iterator = iter(dataset)
     for _ in range(num_train_steps):
         if(step_count % save_checkpoints_steps == 0):
-            checkpoint.save()
+            checkpoint_manager.save()
         task.train_step(next(iterator), model, optimizer, metrics=metrics)
     
 
