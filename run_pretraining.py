@@ -154,7 +154,7 @@ if __name__ == '__main__':
                             help="size of the model, either 'small', 'base', or 'large'")
     parser.add_argument("--use-pretrained", action="store_true",
                             help="use a pretrained BERT and attempt distribution dulling")
-    parser.add_argument("--training-steps", action="store", type=int, default=1000000
+    parser.add_argument("--training-steps", action="store", type=int, default=1000000,
                             help="number of training steps to run. 1000000 is default.")
     args = parser.parse_args()
     tf.logging.set_verbosity(tf.logging.ERROR)
