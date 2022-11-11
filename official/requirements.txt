@@ -27,3 +27,5 @@ sentencepiece
 sacrebleu
 # Projects/vit dependencies
 immutabledict
+pydot
+graphviz

@@ -35,7 +35,7 @@ class BertEncoderConfig(hyperparams.Config):
   vocab_size: int = 30522
   hidden_size: int = 768
   num_layers: int = 12
-  num_attention_heads: int = 12
+  num_attention_heads: int = 12 #NRP should be 4 for electra_small
   hidden_activation: str = "gelu"
   intermediate_size: int = 3072
   dropout_rate: float = 0.1

@@ -29,19 +29,38 @@ from official.nlp.modeling import layers
 from official.nlp.modeling import models
 
 
+#NRP NOTE: This seems to be a singleton that saves default parameters. Check electra_task_test.py for usage case.
 @dataclasses.dataclass
 class ElectraPretrainConfig(cfg.TaskConfig):
   """The model config."""
   model: electra.ElectraPretrainerConfig = electra.ElectraPretrainerConfig(
       cls_heads=[
           bert.ClsHeadConfig(
-              inner_dim=768,
+              inner_dim=768, #NRP NOTE: should be 256 for electra small; 12 hidden layers
               num_classes=2,
               dropout_rate=0.1,
               name='next_sentence')
       ])
   train_data: cfg.DataConfig = cfg.DataConfig()
   validation_data: cfg.DataConfig = cfg.DataConfig()
+
+  # Custom metric for tracking EMR.
+  class EffectiveMaskRateMetric(tf.keras.metrics.Metric):
+    """
+    Custom metric for tracking EMR. 
+    Method: keep track of how many labels are positive for rtd task.
+    """
+    def __init__(self, mask_prob):
+      self._num_pos = self.add_weight(shape=(0,), dtype=tf.float32)
+      self._num_tot = self.add_weight(shape=(0,), dtype=tf.float32)
+
+    def update_state(self, rtd_labels):
+      flat_labels = tf.reshape(rtd_labels, [-1])
+      self._num_pos.assign_add(tf.math.reduce_sum(flat_labels))
+      self._num_tot.assign_add(tf.size(flat_labels)) 
+
+    def result(self):
+      return self._num_pos / self._num_tot
 
 
 def _build_pretrainer(
@@ -162,6 +181,7 @@ class ElectraPretrainTask(base_task.Task):
         tf.keras.metrics.Mean(name='lm_example_loss'),
         tf.keras.metrics.SparseCategoricalAccuracy(
             name='discriminator_accuracy'),
+        EffectiveMaskRateMetric(name='effective_masking_rate'),
     ]
     if self.task_config.train_data.use_next_sentence_label:
       metrics.append(
@@ -180,6 +200,8 @@ class ElectraPretrainTask(base_task.Task):
       metrics['masked_lm_accuracy'].update_state(labels['masked_lm_ids'],
                                                  model_outputs['lm_outputs'],
                                                  labels['masked_lm_weights'])
+    if 'effective_masking_rate' in metrics:
+      metrics['effective_masking_rate'].update_state(model_outputs['disc_label'])
     if 'next_sentence_accuracy' in metrics:
       metrics['next_sentence_accuracy'].update_state(
           labels['next_sentence_labels'], model_outputs['sentence_outputs'])
