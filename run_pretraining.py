@@ -33,7 +33,7 @@ from official.nlp import optimization
 #     orbit.StandardTrainer.__init__(self, train_dataset)
 
 
-def main(data_dir, model_name, model_size, use_pretrained):
+def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     # build config for ELECTRA model
     if use_pretrained:
         raise ValueError("Using pretrained BERT is not yet supported.")
@@ -97,7 +97,7 @@ def main(data_dir, model_name, model_size, use_pretrained):
     learning_rate = 5e-4
     lr_decay_power = 1.0  # linear weight decay by default
     weight_decay_rate = 0.01
-    num_warmup_steps = 10000 if num_train_steps >= 100000 else 0 # for debugging
+    num_warmup_steps = 10000 if training_steps >= 100000 else 0 # for debugging
 
     # training settings
     iterations_per_loop = 200
@@ -157,6 +157,5 @@ if __name__ == '__main__':
     parser.add_argument("--training-steps", action="store", type=int, default=1000000,
                             help="number of training steps to run. 1000000 is default.")
     args = parser.parse_args()
-    tf.logging.set_verbosity(tf.logging.ERROR)
     
     main(args.data_dir, args.model_name, args.model_size, args.use_pretrained, args.training_steps)

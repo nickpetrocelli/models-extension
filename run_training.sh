@@ -18,4 +18,4 @@ which python3
 echo $DATA_DIR
 echo $1
 echo $2
-python3 run_pretraining.py --data-dir $DATA_DIR --model-name $1 --training_steps $2
+python3 run_pretraining.py --data-dir $DATA_DIR --model-name $1 --training-steps $2
