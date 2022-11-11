@@ -50,7 +50,8 @@ class EffectiveMaskRateMetric(tf.keras.metrics.Metric):
   Custom metric for tracking EMR. 
   Method: keep track of how many labels are positive for rtd task.
   """
-  def __init__(self, mask_prob):
+  def __init__(self, name=None, dtype=None):
+    super(name=name, dtype=dtype)
     self._num_pos = self.add_weight(shape=(0,), dtype=tf.float32)
     self._num_tot = self.add_weight(shape=(0,), dtype=tf.float32)
 
