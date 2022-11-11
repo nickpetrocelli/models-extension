@@ -71,7 +71,8 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
                 )
             ]),
         train_data=pretrain_dataloader.BertPretrainDataConfig(
-            input_path=[f'{data_dir}/pretrain_tfrecords/{rec}' for rec in os.listdir(f"{data_dir}/pretrain_tfrecords/")],
+            tfds_name='huggingface:openwebtext/plain_text',
+            tfds_split='train',
             max_predictions_per_seq=20,
             seq_length=128,
             global_batch_size=128))
