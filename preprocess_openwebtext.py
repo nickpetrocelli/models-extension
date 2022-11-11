@@ -12,12 +12,12 @@ import datasets as hfds
 
 
 def main(data_dir):
-	# data dir? TODO
-	dataset = load_dataset("openwebtext")
-	print(dataset[0])
+    # data dir? TODO
+    dataset = load_dataset("openwebtext")
+    print(dataset[0])
 
-	dataset_tensors = dataset.with_format("tf")
-	print(dataset_tensors[0])
+    dataset_tensors = dataset.with_format("tf")
+    print(dataset_tensors[0])
 
 
 
@@ -25,8 +25,7 @@ def main(data_dir):
 
 
 if __name__ == '__main__':
-	parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--data-dir", required=True,
-                      help="Location of data files (model weights, etc).")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--data-dir", required=True, help="Location of data files (model weights, etc).")
     parser.parse_args()
-	main(parser.data_dir)
+    main(parser.data_dir)
