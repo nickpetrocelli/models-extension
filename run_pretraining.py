@@ -71,7 +71,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
                 )
             ]),
         train_data=pretrain_dataloader.BertPretrainDataConfig(
-            input_path=f"{data_dir}/pretrain_tfrecords/",
+            input_path=os.listdir(f"{data_dir}/pretrain_tfrecords/"),
             max_predictions_per_seq=20,
             seq_length=128,
             global_batch_size=128))
