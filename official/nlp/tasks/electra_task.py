@@ -52,8 +52,8 @@ class EffectiveMaskRateMetric(tf.keras.metrics.Metric):
   """
   def __init__(self, name=None, dtype=None):
     super().__init__(name=name, dtype=dtype)
-    self._num_pos = self.add_weight(shape=(0,), dtype=tf.float32)
-    self._num_tot = self.add_weight(shape=(0,), dtype=tf.float32)
+    self._num_pos = self.add_weight(name=None, shape=(0,), dtype=tf.float32)
+    self._num_tot = self.add_weight(name=None, shape=(0,), dtype=tf.float32)
 
   def update_state(self, rtd_labels):
     flat_labels = tf.reshape(rtd_labels, [-1])
