@@ -263,14 +263,14 @@ class InputReader:
     if params.input_path:
       self._matched_files = self.get_files(params.input_path)
       # Read dataset from TFDS.
-    else if params.tdfs_name:
+    elif params.tdfs_name:
       if not params.tfds_split:
         raise ValueError(
             '`tfds_name` is %s, but `tfds_split` is not specified.' %
             params.tfds_name)
       self._tfds_builder = tfds.builder(
           params.tfds_name, data_dir=params.tfds_data_dir)
-    else if params.dataset_path:
+    elif params.dataset_path:
       self._dataset_path = params.dataset_path
     else:
       raise ValueError(
