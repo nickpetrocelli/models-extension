@@ -17,23 +17,20 @@ class BertInputProcessor(tf.keras.layers.Layer):
     self.packer = packer
 
   def call(self, inputs):
-    tok1 = self.tokenizer(inputs['text'])
+    tok1 = self.tokenizer(inputs)
 
     packed = self.packer([tok1])
 
-    if 'label' in inputs:
-      return packed, inputs['label']
-    else:
-      return packed
+    return packed
 
 
 def main(data_dir):
     # data dir? TODO
-    dataset = hfds.load_dataset("wikitext", "wikitext-103-raw-v1", split="train")
+    dataset = hfds.load_dataset("ptb_text_only", split="train")
     print(dataset[0])
 
     dataset_tensors = dataset.to_tf_dataset(
-            columns=["text"],
+            columns=["sentence"],
             batch_size = 128, # same as model spec
         )
 
@@ -52,9 +49,9 @@ def main(data_dir):
     bert_inputs_processor = BertInputProcessor(tokenizer, packer)
 
     packed_data = dataset_tensors.map(bert_inputs_processor)
-
+    print(type(packed_data[0]))
     # save it out
-    packed_data.save(os.path.join(data_dir, 'wikitext', ''))
+    packed_data.save(os.path.join(data_dir, 'ptb_text_only', ''))
 
 
 
