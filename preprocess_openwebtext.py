@@ -32,12 +32,10 @@ def main(data_dir):
     dataset = hfds.load_dataset("wikitext", "wikitext-103-raw-v1", split="train")
     print(dataset[0])
 
-    dataset_tensors = dataset.with_format("tf")
-    print(dataset_tensors[0])
-
-    tf_dataset_raw = tf.data.Dataset.from_tensor_slices(dataset_tensors)
-    print(tf_dataset_raw[0])
-
+    dataset_tensors = dataset.to_tf_dataset(
+            columns=["text"],
+            batch_size = 128, # same as model spec
+        )
 
 
     # https://www.tensorflow.org/tfmodels/nlp/fine_tune_bert
@@ -53,9 +51,10 @@ def main(data_dir):
 
     bert_inputs_processor = BertInputProcessor(tokenizer, packer)
 
+    packed_data = dataset_tensors.map(bert_inputs_processor)
 
-
-
+    # save it out
+    packed_data.save(os.path.join(data_dir, 'wikitext', ''))
 
 
 

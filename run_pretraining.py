@@ -39,6 +39,24 @@ from official.nlp import optimization
 
 
 def main(data_dir, model_name, model_size, use_pretrained, training_steps):
+     # training hyperparameters: designed for parity with google impl
+    max_seq_length = 128
+    train_batch_size = 128
+    eval_batch_size = 128
+    # optimization
+    learning_rate = 5e-4
+    lr_decay_power = 1.0  # linear weight decay by default
+    weight_decay_rate = 0.01
+    num_warmup_steps = 10000 if training_steps >= 100000 else 0 # for debugging
+
+    # training settings
+    iterations_per_loop = 200
+    save_checkpoints_steps = 1000
+    num_train_steps = training_steps
+    num_eval_steps = 100
+    keep_checkpoint_max = 5 # maximum number of recent checkpoint files to keep;
+                                 # change to 0 or None to keep all checkpoints
+
     # build config for ELECTRA model
     if use_pretrained:
         raise ValueError("Using pretrained BERT is not yet supported.")
@@ -61,7 +79,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
                                                 embedding_size=128
                                                 )),
             num_masked_tokens=20,
-            sequence_length=128,
+            sequence_length=max_seq_length,
             cls_heads=[
                 bert.ClsHeadConfig(
                     inner_dim=256, #NRP NOTE: should be 256 for electra small; 12 hidden layers
@@ -71,10 +89,9 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
                 )
             ]),
         train_data=pretrain_dataloader.BertPretrainDataConfig(
-            tfds_name='huggingface:openwebtext/plain_text',
-            tfds_split='train',
+            input_path = [os.path.join(data_dir, 'wikitext', file) for file in os.listdir(os.path.join(data_dir, 'wikitext', ''))],
             max_predictions_per_seq=20,
-            seq_length=128,
+            seq_length=max_seq_length,
             global_batch_size=128))
 
 
@@ -95,23 +112,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     # else:
     #   strategy = tf.distribute.OneDeviceStrategy(logical_device_names[0])
 
-    # training hyperparameters: designed for parity with google impl
-    max_seq_length = 128
-    train_batch_size = 128
-    eval_batch_size = 128
-    # optimization
-    learning_rate = 5e-4
-    lr_decay_power = 1.0  # linear weight decay by default
-    weight_decay_rate = 0.01
-    num_warmup_steps = 10000 if training_steps >= 100000 else 0 # for debugging
-
-    # training settings
-    iterations_per_loop = 200
-    save_checkpoints_steps = 1000
-    num_train_steps = training_steps
-    num_eval_steps = 100
-    keep_checkpoint_max = 5 # maximum number of recent checkpoint files to keep;
-                                 # change to 0 or None to keep all checkpoints
+   
     task = electra_task.ElectraPretrainTask(config)
     
         
