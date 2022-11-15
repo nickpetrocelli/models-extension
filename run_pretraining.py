@@ -89,6 +89,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
                 )
             ]),
         train_data=pretrain_dataloader.BertPretrainDataConfig(
+            tfds_name=None,
             dataset_path=os.path.join(data_dir, 'ptb_text_only', ''),
             max_predictions_per_seq=20,
             seq_length=max_seq_length,
