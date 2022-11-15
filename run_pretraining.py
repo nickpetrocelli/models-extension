@@ -120,7 +120,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     # TODO augment with EMR estimate
     metrics = task.build_metrics()
     #dataset = task.build_inputs(config.train_data)
-    dataset = tf.data.load(os.path.join(data_dir, 'ptb_text_only', ''))
+    dataset = tf.data.Dataset.load(os.path.join(data_dir, 'ptb_text_only', ''))
     
     optimizer = optimization.create_optimizer(
         init_lr=learning_rate,

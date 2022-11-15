@@ -30,6 +30,7 @@ from official.nlp.data import data_loader_factory
 class BertPretrainDataConfig(cfg.DataConfig):
   """Data config for BERT pretraining task (tasks/masked_lm)."""
   input_path: str = ''
+  dataset_path: str = ''
   global_batch_size: int = 512
   is_training: bool = True
   seq_length: int = 512
@@ -127,9 +128,10 @@ class BertPretrainDataLoader(data_loader.DataLoader):
 
   def load(self, input_context: Optional[tf.distribute.InputContext] = None):
     """Returns a tf.dataset.Dataset."""
+    dataset = tf.data.Dataset.load(self._params.dataset_path) if self._params.dataset_path else None
     reader = input_reader.InputReader(
         params=self._params, decoder_fn=self._decode, parser_fn=self._parse)
-    return reader.read(input_context)
+    return reader.read(input_context, dataset=dataset)
 
 
 @dataclasses.dataclass
