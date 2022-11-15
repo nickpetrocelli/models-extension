@@ -89,7 +89,9 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
                 )
             ]),
         train_data=pretrain_dataloader.BertPretrainDataConfig(
-            input_path = [os.path.join(data_dir, 'wikitext', file) for file in os.listdir(os.path.join(data_dir, 'wikitext', ''))],
+            #dataset_path=os.path.join(data_dir, 'ptb_text_only', ''),
+            tfds_name='wikipedia/20220620.en',
+            tfds_split='train',
             max_predictions_per_seq=20,
             seq_length=max_seq_length,
             global_batch_size=128))
@@ -120,7 +122,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     # TODO augment with EMR estimate
     metrics = task.build_metrics()
     #dataset = task.build_inputs(config.train_data)
-    dataset = tf.data.Dataset.load(os.path.join(data_dir, 'ptb_text_only', ''))
+    dataset = tf.data.Dataset.load()
     
     optimizer = optimization.create_optimizer(
         init_lr=learning_rate,
