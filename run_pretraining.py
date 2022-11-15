@@ -89,11 +89,12 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
                 )
             ]),
         train_data=pretrain_dataloader.BertPretrainDataConfig(
-            #dataset_path=os.path.join(data_dir, 'ptb_text_only', ''),
-            tfds_name='wikipedia/20220620.en',
-            tfds_split='train',
+            dataset_path=os.path.join(data_dir, 'ptb_text_only', ''),
+            #tfds_name='wikipedia/20220620.en',
+            #tfds_split='train',
             max_predictions_per_seq=20,
             seq_length=max_seq_length,
+            use_v2_feature_names = True,
             global_batch_size=128))
 
 
