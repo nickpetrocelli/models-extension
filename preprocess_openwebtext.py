@@ -52,12 +52,10 @@ def main(data_dir):
     # bert_inputs_processor = BertInputProcessor(tokenizer, packer)
 
     packed_data = dataset_tensors.map(preprocess)
-    print(type(packed_data))
-    #packed_data = dataset_tensors.map(bert_inputs_processor)
-    # packed_data.repeat()
-    # # save it out
-    # output_path = os.path.join(data_dir, 'ptb_text_only', '')
-    # packed_data.save(output_path)
+    packed_data.repeat()
+    # save it out
+    output_path = os.path.join(data_dir, 'ptb_text_only', '')
+    packed_data.save(output_path)
 
 
 
