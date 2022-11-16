@@ -18,7 +18,7 @@ _MAX_PREDICTIONS_PER_BATCH = 20
 _tokenizer = tfm_layers.FastWordpieceBertTokenizer(
          vocab_file=os.path.join('/home/npetroce/data/', "vocab.txt"),
          lower_case=True)
-_special_tokens_dict = tokenizer.get_special_tokens_dict()
+_special_tokens_dict = _tokenizer.get_special_tokens_dict()
 _trimmer = text.RoundRobinTrimmer(max_seq_length=_MAX_SEQ_LEN)
 
 _random_selector = text.RandomItemSelector(
