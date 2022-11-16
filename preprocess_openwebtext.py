@@ -112,8 +112,8 @@ def main(data_dir):
     }
 
     dummy_dataset = tf.data.Dataset.from_tensor_slices(examples)
-    print(next(iter(dummy_dataset)))
-    print(_tokenizer(next(iter(dummy_dataset))['sentence']))
+    #print(next(iter(dummy_dataset)))
+    #print(_tokenizer(next(iter(dummy_dataset))['sentence']))
 
     # data dir? TODO
     dataset = hfds.load_dataset("ptb_text_only", split="train")
