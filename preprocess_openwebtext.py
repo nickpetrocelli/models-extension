@@ -22,7 +22,7 @@ def bert_pretrain_preprocess(inputs):
   # segments = [tokenizer.tokenize(text).merge_dims(
   #     1, -1) for text in (text_a, text_b)]
   tokenizer = tfm_layers.FastWordpieceBertTokenizer(
-         vocab_file=os.path.join(data_dir, "vocab.txt"),
+         vocab_file=os.path.join('/home/npetroce/data/', "vocab.txt"),
          lower_case=True)
   segments = tokenizer(inputs)
   special_tokens_dict = tokenizer.get_special_tokens_dict()
@@ -122,6 +122,7 @@ def main(data_dir):
 
     packed_data = dataset_tensors.map(bert_pretrain_preprocess)
     packed_data.repeat()
+    print(next(iter(packed_data)))
     # save it out
     output_path = os.path.join(data_dir, 'ptb_text_only', '')
     packed_data.save(output_path)
