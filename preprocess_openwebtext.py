@@ -113,7 +113,7 @@ def main(data_dir):
 
     dummy_dataset = tf.data.Dataset.from_tensor_slices(examples)
     print(next(iter(dummy_dataset)))
-    print(_tokenizer(next(iter(dummy_dataset['sentence']))))
+    print(_tokenizer(next(iter(dummy_dataset))['sentence']))
 
     # data dir? TODO
     dataset = hfds.load_dataset("ptb_text_only", split="train")
@@ -133,7 +133,7 @@ def main(data_dir):
             shuffle=True, 
         )
     print(next(iter(dataset_tensors_2)))
-    print(_tokenizer(next(iter(dataset_tensors_2['sentence']))))
+    print(_tokenizer(next(iter(dataset_tensors_2))['sentence']))
 
 
     # from https://tfhub.dev/google/electra_small/2
