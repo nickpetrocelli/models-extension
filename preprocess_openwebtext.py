@@ -35,25 +35,29 @@ def main(data_dir):
             shuffle=True, 
         )
 
+    # from https://tfhub.dev/google/electra_small/2
+    preprocess = hub.load('https://tfhub.dev/tensorflow/bert_en_uncased_preprocess/3')
 
-    # https://www.tensorflow.org/tfmodels/nlp/fine_tune_bert
-    tokenizer = tfm_layers.FastWordpieceBertTokenizer(
-        vocab_file=os.path.join(data_dir, "vocab.txt"),
-        lower_case=True)
+    # # https://www.tensorflow.org/tfmodels/nlp/fine_tune_bert
+    # tokenizer = tfm_layers.FastWordpieceBertTokenizer(
+    #     vocab_file=os.path.join(data_dir, "vocab.txt"),
+    #     lower_case=True)
 
-    max_seq_length = 128 # same as model specification in run_pretraining.py
+    # max_seq_length = 128 # same as model specification in run_pretraining.py
 
-    packer = tfm_layers.BertPackInputs(
-        seq_length=max_seq_length,
-        special_tokens_dict = tokenizer.get_special_tokens_dict())
+    # packer = tfm_layers.BertPackInputs(
+    #     seq_length=max_seq_length,
+    #     special_tokens_dict = tokenizer.get_special_tokens_dict())
 
-    bert_inputs_processor = BertInputProcessor(tokenizer, packer)
+    # bert_inputs_processor = BertInputProcessor(tokenizer, packer)
 
-    packed_data = dataset_tensors.map(bert_inputs_processor)
-    packed_data.repeat()
-    # save it out
-    output_path = os.path.join(data_dir, 'ptb_text_only', '')
-    packed_data.save(output_path)
+    packed_data = preprocess(dataset_tensors)
+    print(type(packed_data))
+    #packed_data = dataset_tensors.map(bert_inputs_processor)
+    # packed_data.repeat()
+    # # save it out
+    # output_path = os.path.join(data_dir, 'ptb_text_only', '')
+    # packed_data.save(output_path)
 
 
 
