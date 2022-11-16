@@ -124,7 +124,7 @@ def main(data_dir):
             shuffle=True, 
         )
     print(next(iter(dataset_tensors)))
-    print(_tokenizer(next(iter(dataset_tensors))))
+    print(_tokenizer(next(iter(dataset_tensors['sentence']))))
 
 
     # from https://tfhub.dev/google/electra_small/2
