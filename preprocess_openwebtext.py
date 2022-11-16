@@ -29,8 +29,12 @@ def main(data_dir):
     dataset = hfds.load_dataset("ptb_text_only", split="train")
     print(dataset[0])
 
-    dataset_tensors = dataset.with_format("tf")
-    print(type(dataset_tensors))
+    dataset_tensors = dataset.with_format(
+            columns=["sentence"],
+            batch_size = 128, # same as model spec
+            shuffle=True, 
+        )
+
     # from https://tfhub.dev/google/electra_small/2
     preprocess = hub.load('https://tfhub.dev/tensorflow/bert_en_uncased_preprocess/3')
 
@@ -47,7 +51,7 @@ def main(data_dir):
 
     # bert_inputs_processor = BertInputProcessor(tokenizer, packer)
 
-    packed_data = preprocess(dataset_tensors['sentence'])
+    packed_data = dataset_tensors.map(preprocess)
     print(type(packed_data))
     #packed_data = dataset_tensors.map(bert_inputs_processor)
     # packed_data.repeat()
