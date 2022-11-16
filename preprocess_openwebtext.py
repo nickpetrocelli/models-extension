@@ -113,16 +113,19 @@ def main(data_dir):
 
     dummy_dataset = tf.data.Dataset.from_tensor_slices(examples)
     print(next(iter(dummy_dataset)))
+    print(_tokenizer(next(iter(dummy_dataset))))
 
     # data dir? TODO
     dataset = hfds.load_dataset("ptb_text_only", split="train")
 
     dataset_tensors = dataset.to_tf_dataset(
             columns=["sentence"],
-            batch_size = 128, # same as model spec
+            batch_size = 1, # TODO same as model spec
             shuffle=True, 
         )
     print(next(iter(dataset_tensors)))
+    print(_tokenizer(next(iter(dataset_tensors))))
+
 
     # from https://tfhub.dev/google/electra_small/2
     #preprocess = hub.load('https://tfhub.dev/tensorflow/bert_en_uncased_preprocess/3')
