@@ -11,6 +11,7 @@ import argparse
 import tensorflow_text as text
 
 _MAX_SEQ_LEN = 128
+_MAX_PREDICTIONS_PER_BATCH = 20
 
 # modified from https://www.tensorflow.org/text/guide/bert_preprocessing_guide
 def bert_pretrain_preprocess(inputs):
