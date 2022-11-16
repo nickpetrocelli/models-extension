@@ -13,6 +13,23 @@ import tensorflow_text as text
 _MAX_SEQ_LEN = 128
 _MAX_PREDICTIONS_PER_BATCH = 20
 
+# defining globals to save computation
+
+_tokenizer = tfm_layers.FastWordpieceBertTokenizer(
+         vocab_file=os.path.join('/home/npetroce/data/', "vocab.txt"),
+         lower_case=True)
+_special_tokens_dict = tokenizer.get_special_tokens_dict()
+_trimmer = text.RoundRobinTrimmer(max_seq_length=_MAX_SEQ_LEN)
+
+_random_selector = text.RandomItemSelector(
+    max_selections_per_batch=_MAX_PREDICTIONS_PER_BATCH,
+    selection_rate=0.15,
+    unselectable_ids=[_special_tokens_dict['start_of_sequence_id'], _special_tokens_dict['end_of_segment_id'], _tokenizer._vocab.index('[UNK]')]
+    )
+_mask_values_chooser = text.MaskValuesChooser(
+    _special_tokens_dict['vocab_size'], _special_tokens_dict['mask_id'], mask_token_rate=1.0, random_token_rate=0.0
+    )
+
 # modified from https://www.tensorflow.org/text/guide/bert_preprocessing_guide
 def bert_pretrain_preprocess(inputs):
 
@@ -22,15 +39,12 @@ def bert_pretrain_preprocess(inputs):
   #     token_out_type=tf.int64)
   # segments = [tokenizer.tokenize(text).merge_dims(
   #     1, -1) for text in (text_a, text_b)]
-  tokenizer = tfm_layers.FastWordpieceBertTokenizer(
-         vocab_file=os.path.join('/home/npetroce/data/', "vocab.txt"),
-         lower_case=True)
-  segments = tokenizer(inputs)
-  special_tokens_dict = tokenizer.get_special_tokens_dict()
-
+  
+  segments = _tokenizer(inputs)
+  
   # Truncate inputs to a maximum length.
-  trimmer = text.RoundRobinTrimmer(max_seq_length=_MAX_SEQ_LEN)
-  trimmed_segments = trimmer.trim(segments)
+  
+  trimmed_segments = _trimmer.trim(segments)
 
   # Combine segments, get segment ids and add special tokens.
   segments_combined, segment_ids = text.combine_segments(
@@ -38,20 +52,14 @@ def bert_pretrain_preprocess(inputs):
       start_of_sequence_id=special_tokens_dict['start_of_sequence_id'],
       end_of_segment_id=special_tokens_dict['end_of_segment_id'])
 
-  random_selector = text.RandomItemSelector(
-    max_selections_per_batch=_MAX_PREDICTIONS_PER_BATCH,
-    selection_rate=0.15,
-    unselectable_ids=[special_tokens_dict['start_of_sequence_id'], special_tokens_dict['end_of_segment_id'], tokenizer._vocab.index('[UNK]')]
-    )
+  
 
   # Apply dynamic masking task.
   masked_input_ids, masked_lm_positions, masked_lm_ids = (
       text.mask_language_model(
         segments_combined,
-        random_selector,
-        text.MaskValuesChooser(
-            special_tokens_dict['vocab_size'], special_tokens_dict['mask_id'], mask_token_rate=1.0, random_token_rate=0.0
-        ),
+        _random_selector,
+        _mask_values_chooser,
       )
   )
 
