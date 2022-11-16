@@ -29,7 +29,7 @@ def main(data_dir):
     dataset = hfds.load_dataset("ptb_text_only", split="train")
     print(dataset[0])
 
-    dataset_tensors = dataset.with_format(
+    dataset_tensors = dataset.to_tf_dataset(
             columns=["sentence"],
             batch_size = 128, # same as model spec
             shuffle=True, 
