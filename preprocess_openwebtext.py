@@ -103,15 +103,26 @@ class BertInputProcessor(tf.keras.layers.Layer):
 
 
 def main(data_dir):
+    # dummy data for testing
+    examples = {
+        "sentence": [
+          "Sponge bob Squarepants is an Avenger",
+          "Marvel Avengers"
+        ],
+    }
+
+    dummy_dataset = tf.data.Dataset.from_tensor_slices(examples)
+    print(next(iter(dummy_dataset)))
+
     # data dir? TODO
     dataset = hfds.load_dataset("ptb_text_only", split="train")
-    print(dataset[0])
 
     dataset_tensors = dataset.to_tf_dataset(
             columns=["sentence"],
             batch_size = 128, # same as model spec
             shuffle=True, 
         )
+    print(next(iter(dataset_tensors)))
 
     # from https://tfhub.dev/google/electra_small/2
     #preprocess = hub.load('https://tfhub.dev/tensorflow/bert_en_uncased_preprocess/3')
@@ -129,12 +140,12 @@ def main(data_dir):
 
     # bert_inputs_processor = BertInputProcessor(tokenizer, packer)
 
-    packed_data = dataset_tensors.map(bert_pretrain_preprocess)
-    packed_data.repeat()
-    print(next(iter(packed_data)))
-    # save it out
-    output_path = os.path.join(data_dir, 'ptb_text_only', '')
-    packed_data.save(output_path)
+    # packed_data = dataset_tensors.map(bert_pretrain_preprocess)
+    # packed_data.repeat()
+    # print(next(iter(packed_data)))
+    # # save it out
+    # output_path = os.path.join(data_dir, 'ptb_text_only', '')
+    # packed_data.save(output_path)
 
 
 
