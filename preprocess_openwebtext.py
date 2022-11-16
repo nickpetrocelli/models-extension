@@ -40,11 +40,14 @@ def bert_pretrain_preprocess(inputs):
   # segments = [tokenizer.tokenize(text).merge_dims(
   #     1, -1) for text in (text_a, text_b)]
   
-  segments = _tokenizer(inputs)
   
   # Truncate inputs to a maximum length.
+  segments = _tokenizer(inputs).merge_dims(
+      1, -1)
   
   trimmed_segments = _trimmer.trim(segments)
+
+
 
   # Combine segments, get segment ids and add special tokens.
   segments_combined, segment_ids = text.combine_segments(
@@ -104,16 +107,13 @@ class BertInputProcessor(tf.keras.layers.Layer):
 
 def main(data_dir):
     # dummy data for testing
-    examples = {
-        "sentence": [
+    examples = [
           "Sponge bob Squarepants is an Avenger",
           "Marvel Avengers"
-        ],
-    }
+    ],
 
     dummy_dataset = tf.data.Dataset.from_tensor_slices(examples)
-    #print(next(iter(dummy_dataset)))
-    #print(_tokenizer(next(iter(dummy_dataset))['sentence']))
+    print(_tokenizer(next(iter(dummy_dataset))))
 
     # data dir? TODO
     dataset = hfds.load_dataset("ptb_text_only", split="train")
@@ -135,6 +135,9 @@ def main(data_dir):
     print(next(iter(dataset_tensors_2)))
     print(_tokenizer(next(iter(dataset_tensors_2))['sentence']))
 
+    packed_dummy = dummy_dataset.map(bert_pretrain_preprocess)
+    print(next(iter(packed_dummy)))
+    packed_dummy.save(os.path.join(data_dir, 'dummy_data', ''))
 
     # from https://tfhub.dev/google/electra_small/2
     #preprocess = hub.load('https://tfhub.dev/tensorflow/bert_en_uncased_preprocess/3')
