@@ -88,6 +88,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
                     name='next_sentence'
                 )
             ]),
+        #dummy?
         train_data=pretrain_dataloader.BertPretrainDataConfig(
             tfds_name=None,
             dataset_path=os.path.join(data_dir, 'ptb_text_only', ''),
