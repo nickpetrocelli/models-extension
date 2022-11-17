@@ -123,7 +123,7 @@ def main(data_dir):
 
     dataset_tensors = dataset.to_tf_dataset(
             columns=["sentence"],
-            batch_size = 1, # TODO same as model spec
+            batch_size = 128, # TODO same as model spec
             shuffle=True, 
         )
 
@@ -164,12 +164,12 @@ def main(data_dir):
 
     # bert_inputs_processor = BertInputProcessor(tokenizer, packer)
 
-    # packed_data = dataset_tensors.map(bert_pretrain_preprocess)
+    packed_data = dataset_tensors.map(bert_pretrain_preprocess)
     # packed_data.repeat()
-    # print(next(iter(packed_data)))
+    print(next(iter(packed_data)))
     # # save it out
-    # output_path = os.path.join(data_dir, 'ptb_text_only', '')
-    # packed_data.save(output_path)
+    output_path = os.path.join(data_dir, 'ptb_text_only', '')
+    packed_data.save(output_path)
 
 
 
