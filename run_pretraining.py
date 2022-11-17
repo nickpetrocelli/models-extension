@@ -150,7 +150,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
 
     step_count = 0 
     iterator = iter(dataset)
-    csvpath = os.path.join(data_dir, '/model_ckpts/', model_name, 'pretrain_metrics.csv')
+    csvpath = os.path.join(data_dir, 'model_ckpts/', model_name, 'pretrain_metrics.csv')
     print(csvpath)
     with open(csvpath, 'w', newline='') as csvfile:
         fieldnames = ['step','total_loss', 'discriminator_loss', 'lm_example_loss', 'effective_masking_rate', 'discriminator_accuracy', 'masked_lm_accuracy']
