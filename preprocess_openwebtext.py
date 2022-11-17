@@ -53,8 +53,8 @@ def bert_pretrain_preprocess(inputs):
   # Combine segments, get segment ids and add special tokens.
   segments_combined, segment_ids = text.combine_segments(
       trimmed_segments,
-      start_of_sequence_id=special_tokens_dict['start_of_sequence_id'],
-      end_of_segment_id=special_tokens_dict['end_of_segment_id'])
+      start_of_sequence_id=_special_tokens_dict['start_of_sequence_id'],
+      end_of_segment_id=_special_tokens_dict['end_of_segment_id'])
 
   
 
