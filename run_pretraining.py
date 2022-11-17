@@ -141,7 +141,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     checkpoint = tf.train.Checkpoint(model=model, optimizer=optimizer)
     checkpoint_manager = tf.train.CheckpointManager(
         checkpoint,
-        directory=os.path.join(data_dir, '/model_ckpts/', model_name, ''),
+        directory=os.path.join(data_dir, 'model_ckpts/', model_name, ''),
         max_to_keep=keep_checkpoint_max,
         step_counter=optimizer.iterations,
         checkpoint_interval=save_checkpoints_steps,
