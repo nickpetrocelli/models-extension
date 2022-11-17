@@ -142,11 +142,11 @@ def main(data_dir):
       1, -1)]
     print(segments)
 
-    dummy_dataset.batch(2)
+    # dummy_dataset.batch(2)
 
-    packed_dummy = dummy_dataset.map(bert_pretrain_preprocess)
-    print(next(iter(packed_dummy)))
-    packed_dummy.save(os.path.join(data_dir, 'dummy_data', ''))
+    # packed_dummy = dummy_dataset.map(bert_pretrain_preprocess)
+    # print(next(iter(packed_dummy)))
+    # packed_dummy.save(os.path.join(data_dir, 'dummy_data', ''))
 
     # from https://tfhub.dev/google/electra_small/2
     #preprocess = hub.load('https://tfhub.dev/tensorflow/bert_en_uncased_preprocess/3')
