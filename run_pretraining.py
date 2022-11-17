@@ -81,12 +81,12 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
             num_masked_tokens=20,
             sequence_length=max_seq_length,
             cls_heads=[
-                bert.ClsHeadConfig(
-                    inner_dim=256, #NRP NOTE: should be 256 for electra small; 12 hidden layers
-                    num_classes=2,
-                    dropout_rate=0.1,
-                    name='next_sentence'
-                )
+                # bert.ClsHeadConfig(
+                #     inner_dim=256, #NRP NOTE: should be 256 for electra small; 12 hidden layers
+                #     num_classes=2,
+                #     dropout_rate=0.1,
+                #     name='next_sentence'
+                # )
             ]),
         #dummy?
         train_data=pretrain_dataloader.BertPretrainDataConfig(
