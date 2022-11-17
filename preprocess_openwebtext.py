@@ -80,12 +80,12 @@ def bert_pretrain_preprocess(inputs):
     masked_lm_ids, max_seq_length=_MAX_PREDICTIONS_PER_BATCH)
 
   model_inputs = {
-      "input_word_ids": input_word_ids,
-      "input_mask": input_mask,
-      "input_type_ids": input_type_ids,
-      "masked_lm_ids": masked_lm_ids,
-      "masked_lm_positions": masked_lm_positions,
-      "masked_lm_weights": masked_lm_weights,
+      "input_word_ids": tf.cast(input_word_ids, dtype=tf.int32),
+      "input_mask": tf.cast(input_mask, dtype=tf.int32),
+      "input_type_ids": tf.cast(input_type_ids, dtype=tf.int32),
+      "masked_lm_ids": tf.cast(masked_lm_ids, dtype=tf.int32),
+      "masked_lm_positions": tf.cast(masked_lm_positions, dtype=tf.int32),
+      "masked_lm_weights": tf.cast(masked_lm_weights, dtype=tf.int32),
   }
   return model_inputs
 
