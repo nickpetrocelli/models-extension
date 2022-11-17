@@ -116,7 +116,7 @@ class ElectraPretrainTask(base_task.Task):
         tf.cast(model_outputs['lm_outputs'], tf.float32),
         from_logits=True)
     lm_label_weights = labels['masked_lm_weights']
-    lm_numerator_loss = tf.reduce_sum(lm_prediction_losses * lm_label_weights)
+    lm_numerator_loss = tf.reduce_sum(lm_prediction_losses * tf.cast(lm_label_weights, dtype=tf.float32))
     lm_denominator_loss = tf.reduce_sum(lm_label_weights)
     mlm_loss = tf.math.divide_no_nan(lm_numerator_loss, lm_denominator_loss)
     metrics['lm_example_loss'].update_state(mlm_loss)
