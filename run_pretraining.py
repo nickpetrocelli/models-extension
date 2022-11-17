@@ -138,10 +138,15 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
         optimizer_type='adamw' # same as google
         )
 
+    ckpt_path = os.path.join(data_dir, 'model_ckpts', model_name, '')
+    if not os.path.exists(ckpt_path):
+        os.mkdir(ckpt_path)
+
+
     checkpoint = tf.train.Checkpoint(model=model, optimizer=optimizer)
     checkpoint_manager = tf.train.CheckpointManager(
         checkpoint,
-        directory=os.path.join(data_dir, 'model_ckpts', model_name, ''),
+        directory=ckpt_path,
         max_to_keep=keep_checkpoint_max,
         step_counter=optimizer.iterations,
         checkpoint_interval=save_checkpoints_steps,
@@ -150,7 +155,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
 
     step_count = 0 
     iterator = iter(dataset)
-    csvpath = os.path.join(data_dir, 'model_ckpts', model_name, 'pretrain_metrics.csv')
+    csvpath = os.path.join(ckpt_path, 'pretrain_metrics.csv')
     print(csvpath)
     with open(csvpath, 'w', newline='') as csvfile:
         fieldnames = ['step','total_loss', 'discriminator_loss', 'lm_example_loss', 'effective_masking_rate', 'discriminator_accuracy', 'masked_lm_accuracy']
