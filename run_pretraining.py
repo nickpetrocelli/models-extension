@@ -58,6 +58,8 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     keep_checkpoint_max = 5 # maximum number of recent checkpoint files to keep;
                                  # change to 0 or None to keep all checkpoints
 
+    print("in script")
+    print(data_dir)
     # build config for ELECTRA model
     if use_pretrained:
         raise ValueError("Using pretrained BERT is not yet supported.")
