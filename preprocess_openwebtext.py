@@ -130,13 +130,17 @@ def main(data_dir):
     print(next(iter(dataset_tensors)))
     print(_tokenizer(next(iter(dataset_tensors))))
 
-    dataset_tensors_2 = dataset.to_tf_dataset(
-            columns=[],
-            batch_size = 1, # TODO same as model spec
-            shuffle=True, 
-        )
-    print(next(iter(dataset_tensors_2)))
-    print(_tokenizer(next(iter(dataset_tensors_2))['sentence']))
+    # dataset_tensors_2 = dataset.to_tf_dataset(
+    #         columns=[],
+    #         batch_size = 128, # TODO same as model spec
+    #         shuffle=True, 
+    #     )
+    # print(next(iter(dataset_tensors_2)))
+    # print(_tokenizer(next(iter(dataset_tensors_2))['sentence']))
+
+    segments = [_tokenizer(next(iter(dataset_tensors))).merge_dims(
+      1, -1)]
+    print(segments)
 
     dummy_dataset.batch(2)
 
