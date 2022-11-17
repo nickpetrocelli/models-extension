@@ -52,16 +52,13 @@ class EffectiveMaskRateMetric(tf.keras.metrics.Metric):
   """
   def __init__(self, name=None, dtype=None):
     super().__init__(name=name, dtype=dtype)
-    self._num_pos = self.add_weight(name=None, shape=[], dtype=tf.float32)
-    self._num_tot = self.add_weight(name=None, shape=[], dtype=tf.float32)
+    self._mlm_acc = self.add_weight(name=None, shape=[], dtype=tf.float32)
 
-  def update_state(self, rtd_labels):
-    flat_labels = tf.reshape(rtd_labels, [-1])
-    self._num_pos.assign_add(tf.math.reduce_sum(tf.cast(flat_labels, dtype=tf.float32)))
-    self._num_tot.assign_add(tf.cast(tf.size(flat_labels), dtype=tf.float32)) 
+  def update_state(self, mlm_acc):
+    self._mlm_acc = mlm_acc
 
   def result(self):
-    return self._num_pos / self._num_tot
+    return 0.15 * (1.0 - self._mlm_acc)
 
 
 def _build_pretrainer(
@@ -202,7 +199,7 @@ class ElectraPretrainTask(base_task.Task):
                                                  model_outputs['lm_outputs'],
                                                  labels['masked_lm_weights'])
     if 'effective_masking_rate' in metrics:
-      metrics['effective_masking_rate'].update_state(model_outputs['disc_label'])
+      metrics['effective_masking_rate'].update_state(metrics['masked_lm_accuracy'].result())
     if 'next_sentence_accuracy' in metrics:
       metrics['next_sentence_accuracy'].update_state(
           labels['next_sentence_labels'], model_outputs['sentence_outputs'])
