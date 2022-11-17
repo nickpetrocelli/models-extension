@@ -110,10 +110,12 @@ def main(data_dir):
     # dummy data for testing
     examples = [
           "Sponge bob Squarepants is an Avenger",
+          "Marvel Avengers",
+          "Marvel Avengers",
           "Marvel Avengers"
     ],
 
-    dummy_dataset = tf.data.Dataset.from_tensor_slices(examples)
+    dummy_dataset = tf.data.Dataset.from_tensor(examples)
     print(_tokenizer(next(iter(dummy_dataset))))
 
     # data dir? TODO
@@ -135,6 +137,8 @@ def main(data_dir):
         )
     print(next(iter(dataset_tensors_2)))
     print(_tokenizer(next(iter(dataset_tensors_2))['sentence']))
+
+    dummy_dataset.batch(2)
 
     packed_dummy = dummy_dataset.map(bert_pretrain_preprocess)
     print(next(iter(packed_dummy)))
