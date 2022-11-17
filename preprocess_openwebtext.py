@@ -85,7 +85,7 @@ def bert_pretrain_preprocess(inputs):
       "input_type_ids": tf.cast(input_type_ids, dtype=tf.int32),
       "masked_lm_ids": tf.cast(masked_lm_ids, dtype=tf.int32),
       "masked_lm_positions": tf.cast(masked_lm_positions, dtype=tf.int32),
-      "masked_lm_weights": masked_lm_weights, 
+      "masked_lm_weights": masked_lm_weights,
   }
   return model_inputs
 

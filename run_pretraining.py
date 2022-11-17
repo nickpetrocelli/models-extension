@@ -6,6 +6,7 @@ import pathlib
 import tempfile
 import time
 import argparse
+import csv
 
 import numpy as np
 
@@ -138,7 +139,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     checkpoint = tf.train.Checkpoint(model=model, optimizer=optimizer)
     checkpoint_manager = tf.train.CheckpointManager(
         checkpoint,
-        directory=f"{data_dir}/model_ckpts/{model_name}/",
+        directory=os.path.join(data_dir, '/model_ckpts/', model_name, ''),
         max_to_keep=keep_checkpoint_max,
         step_counter=optimizer.iterations,
         checkpoint_interval=save_checkpoints_steps,
@@ -147,10 +148,16 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
 
     step_count = 0 
     iterator = iter(dataset)
-    for _ in range(num_train_steps):
-        if(step_count % save_checkpoints_steps == 0):
-            checkpoint_manager.save()
-        task.train_step(next(iterator), model, optimizer, metrics=metrics)
+    with open(os.path.join(data_dir, '/model_ckpts/', model_name, 'pretrain_metrics.csv'), 'w', newline='') as csvfile:
+        fieldnames = ['total_loss', 'discriminator_loss', 'lm_example_loss', 'effective_masking_rate', 'discriminator_accuracy', 'masked_lm_accuracy']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for _ in range(num_train_steps):
+            if(step_count % save_checkpoints_steps == 0):
+                checkpoint_manager.save()
+            task.train_step(next(iterator), model, optimizer, metrics=metrics)
+            metric_results = dict([(metric.name, metric.result()) for metric in metrics])
+            writer.writerow(metric_results)
     
 
 
