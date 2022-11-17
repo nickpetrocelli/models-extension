@@ -115,7 +115,7 @@ def main(data_dir):
           "Marvel Avengers"
     ],
 
-    dummy_dataset = tf.data.Dataset.from_tensor(examples)
+    dummy_dataset = tf.data.Dataset.from_tensor_slices(examples)
     print(_tokenizer(next(iter(dummy_dataset))))
 
     # data dir? TODO
