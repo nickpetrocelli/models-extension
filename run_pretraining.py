@@ -148,8 +148,10 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
 
     step_count = 0 
     iterator = iter(dataset)
-    with open(os.path.join(data_dir, '/model_ckpts/', model_name, 'pretrain_metrics.csv'), 'w', newline='') as csvfile:
-        fieldnames = ['total_loss', 'discriminator_loss', 'lm_example_loss', 'effective_masking_rate', 'discriminator_accuracy', 'masked_lm_accuracy']
+    csvpath = os.path.join(data_dir, '/model_ckpts/', model_name, 'pretrain_metrics.csv')
+    print(csvpath)
+    with open(csvpath, 'w', newline='') as csvfile:
+        fieldnames = ['step','total_loss', 'discriminator_loss', 'lm_example_loss', 'effective_masking_rate', 'discriminator_accuracy', 'masked_lm_accuracy']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         for _ in range(num_train_steps):
@@ -157,7 +159,9 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
                 checkpoint_manager.save()
             task.train_step(next(iterator), model, optimizer, metrics=metrics)
             metric_results = dict([(metric.name, metric.result()) for metric in metrics])
+            metric_results['step'] = step_count
             writer.writerow(metric_results)
+            step_count = step_count + 1
     
 
 
