@@ -95,6 +95,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
             max_predictions_per_seq=20,
             seq_length=max_seq_length,
             use_v2_feature_names = True,
+            use_next_sentence_label = False,
             global_batch_size=128))
 
 
