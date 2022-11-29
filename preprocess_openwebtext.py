@@ -42,7 +42,7 @@ def bert_pretrain_preprocess(inputs):
   
   
   # Truncate inputs to a maximum length.
-  print(tf.shape(inputs))
+  #print(tf.shape(inputs))
   segments = [_tokenizer(inputs).merge_dims(
       1, -1)]
   
@@ -108,27 +108,37 @@ class BertInputProcessor(tf.keras.layers.Layer):
 
 def main(data_dir):
     # dummy data for testing
-    examples = [
-          "Sponge bob Squarepants is an Avenger",
-          "Marvel Avengers",
-          "Marvel Avengers",
-          "Marvel Avengers"
-    ],
+    # examples = [
+    #       "Sponge bob Squarepants is an Avenger",
+    #       "Marvel Avengers",
+    #       "Marvel Avengers",
+    #       "Marvel Avengers"
+    # ],
 
-    dummy_dataset = tf.data.Dataset.from_tensor_slices(examples)
-    print(_tokenizer(next(iter(dummy_dataset))))
+    # dummy_dataset = tf.data.Dataset.from_tensor_slices(examples)
+    # print(_tokenizer(next(iter(dummy_dataset))))
 
     # data dir? TODO
-    dataset = hfds.load_dataset("ptb_text_only", split="train")
+    # TODO hardcoded? not sure I really care
+    storage_dir = '/data/people/npetroce'
+    #dataset = hfds.load_dataset("ptb_text_only", split="train")
+    dataset = hfds.load_dataset("openwebtext", split="plain_text", cache_dir=os.path.join(storage_dir, "huggingface_cache", ""))
+
+
+    # dataset_tensors = dataset.to_tf_dataset(
+    #         columns=["sentence"],
+    #         batch_size = 128, # TODO same as model spec
+    #         shuffle=True, 
+    #     )
 
     dataset_tensors = dataset.to_tf_dataset(
-            columns=["sentence"],
+            columns=["text"],
             batch_size = 128, # TODO same as model spec
             shuffle=True, 
         )
 
-    print(next(iter(dataset_tensors)))
-    print(_tokenizer(next(iter(dataset_tensors))))
+    # print(next(iter(dataset_tensors)))
+    # print(_tokenizer(next(iter(dataset_tensors))))
 
     # dataset_tensors_2 = dataset.to_tf_dataset(
     #         columns=[],
@@ -138,9 +148,9 @@ def main(data_dir):
     # print(next(iter(dataset_tensors_2)))
     # print(_tokenizer(next(iter(dataset_tensors_2))['sentence']))
 
-    segments = [_tokenizer(next(iter(dataset_tensors))).merge_dims(
-      1, -1)]
-    print(segments)
+    # segments = [_tokenizer(next(iter(dataset_tensors))).merge_dims(
+    #   1, -1)]
+    # print(segments)
 
     # dummy_dataset.batch(2)
 
@@ -168,7 +178,8 @@ def main(data_dir):
     # packed_data.repeat()
     print(next(iter(packed_data)))
     # # save it out
-    output_path = os.path.join(data_dir, 'ptb_text_only', '')
+    #output_path = os.path.join(data_dir, 'ptb_text_only', '')
+    output_path = os.path.join(storage_dir, 'openwebtext_packed', '')
     packed_data.save(output_path)
 
 
