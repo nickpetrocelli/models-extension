@@ -106,8 +106,8 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
         config = None
         raise ValueError(f"Size {model_size} not yet supported.")
 
-    # # build distribution strategy (directly from https://www.tensorflow.org/tfmodels/orbit)
-    # logical_device_names = [logical_device.name for logical_device in tf.config.list_logical_devices()]
+    # build distribution strategy (directly from https://www.tensorflow.org/tfmodels/orbit)
+    logical_device_names = [logical_device.name for logical_device in tf.config.list_logical_devices()]
 
     if 'GPU' in ''.join(logical_device_names):
       strategy = tf.distribute.MirroredStrategy()
