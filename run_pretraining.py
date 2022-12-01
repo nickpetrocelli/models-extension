@@ -121,15 +121,17 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
 
    
     task = electra_task.ElectraPretrainTask(config)
-    
-    model = task.build_model()
     metrics = task.build_metrics()
     with strategy.scope():
+        
+    
+        model = task.build_model()
+        
         
         #dataset = task.build_inputs(config.train_data)
         # TODO replace with openwebtext
         dataset = tf.data.Dataset.load(os.path.join(data_dir, 'ptb_text_only', ''))
-        dist_dataset = strategy.experimental_distribute_dataset(dataset)
+        # dist_dataset = strategy.experimental_distribute_dataset(dataset)
         
         optimizer = optimization.create_optimizer(
             init_lr=learning_rate,
@@ -157,7 +159,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
 
 
         step_count = 0 
-        iterator = iter(dist_dataset)
+        iterator = iter(dataset)
         csvpath = os.path.join(ckpt_path, 'pretrain_metrics.csv')
         print(csvpath)
         with open(csvpath, 'w', newline='') as csvfile:
@@ -165,7 +167,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
             for _ in range(num_train_steps):
-                strategy.run(task.train_step(next(iterator), model, optimizer, metrics=metrics))
+                task.train_step(next(iterator), model, optimizer, metrics=metrics)
                 metric_results = dict([(metric.name, metric.result().numpy()) for metric in metrics])
                 metric_results['step'] = step_count
                 if(step_count % save_checkpoints_steps == 0):
