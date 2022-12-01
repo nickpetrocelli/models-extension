@@ -236,7 +236,7 @@ class ElectraPretrainTask(base_task.Task):
       # optimizer.
       scaled_loss = loss / tf.distribute.get_strategy().num_replicas_in_sync
     tvars = model.trainable_variables
-    grads = tape.gradient(scaled_loss, tvars)
+    grads = tf.distribute.get_strategy().run(tape.gradient(scaled_loss, tvars))
     optimizer.apply_gradients(list(zip(grads, tvars)))
     self.process_metrics(metrics, inputs, outputs)
     return {self.loss: loss}
