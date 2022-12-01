@@ -118,16 +118,18 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
       strategy = tf.distribute.OneDeviceStrategy(logical_device_names[0])
 
    
-    
+    task = electra_task.ElectraPretrainTask(config)
+    metrics = task.build_metrics()
     with strategy.scope():
-        task = electra_task.ElectraPretrainTask(config)
-        metrics = task.build_metrics()
+        
         model = task.build_model()
         
         
         #dataset = task.build_inputs(config.train_data)
         # TODO replace with openwebtext
         dataset = tf.data.Dataset.load(os.path.join(data_dir, 'ptb_text_only', ''))
+        assert next(iter(dataset)).shape[0] = 128
+        raise ValueError("batching correct?")
         # dist_dataset = strategy.experimental_distribute_dataset(dataset)
         
         optimizer = optimization.create_optimizer(
