@@ -122,10 +122,10 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
    
     task = electra_task.ElectraPretrainTask(config)
     
+    model = task.build_model()
+    metrics = task.build_metrics()
     with strategy.scope():
         
-        model = task.build_model()
-        metrics = task.build_metrics()
         #dataset = task.build_inputs(config.train_data)
         # TODO replace with openwebtext
         dataset = tf.data.Dataset.load(os.path.join(data_dir, 'ptb_text_only', ''))
