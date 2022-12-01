@@ -58,8 +58,6 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     keep_checkpoint_max = 5 # maximum number of recent checkpoint files to keep;
                                  # change to 0 or None to keep all checkpoints
 
-    print("in script")
-    print(data_dir)
     # build config for ELECTRA model
     if use_pretrained:
         raise ValueError("Using pretrained BERT is not yet supported.")
@@ -120,10 +118,10 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
       strategy = tf.distribute.OneDeviceStrategy(logical_device_names[0])
 
    
-    
+    task = electra_task.ElectraPretrainTask(config)
+    metrics = task.build_metrics()
     with strategy.scope():
-        task = electra_task.ElectraPretrainTask(config)
-        metrics = task.build_metrics()
+        
         model = task.build_model()
         
         
@@ -157,22 +155,22 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
             init_fn=None)
 
 
-        step_count = 0 
-        iterator = iter(dataset)
-        csvpath = os.path.join(ckpt_path, 'pretrain_metrics.csv')
-        print(csvpath)
-        with open(csvpath, 'w', newline='') as csvfile:
-            fieldnames = ['step','total_loss', 'discriminator_loss', 'lm_example_loss', 'effective_masking_rate', 'discriminator_accuracy', 'masked_lm_accuracy']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-            for _ in range(num_train_steps):
-                strategy.run(task.train_step(next(iterator), model, optimizer, metrics=metrics))
-                metric_results = dict([(metric.name, metric.result().numpy()) for metric in metrics])
-                metric_results['step'] = step_count
-                if(step_count % save_checkpoints_steps == 0):
-                    checkpoint_manager.save()
-                    writer.writerow(metric_results)
-                step_count = step_count + 1
+    step_count = 0 
+    iterator = iter(dataset)
+    csvpath = os.path.join(ckpt_path, 'pretrain_metrics.csv')
+    print(csvpath)
+    with open(csvpath, 'w', newline='') as csvfile:
+        fieldnames = ['step','total_loss', 'discriminator_loss', 'lm_example_loss', 'effective_masking_rate', 'discriminator_accuracy', 'masked_lm_accuracy']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for _ in range(num_train_steps):
+            strategy.run(task.train_step(next(iterator), model, optimizer, metrics=metrics))
+            metric_results = dict([(metric.name, metric.result().numpy()) for metric in metrics])
+            metric_results['step'] = step_count
+            if(step_count % save_checkpoints_steps == 0):
+                checkpoint_manager.save()
+                writer.writerow(metric_results)
+            step_count = step_count + 1
     
 
 
