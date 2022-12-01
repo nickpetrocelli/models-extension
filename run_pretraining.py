@@ -52,7 +52,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
 
     # training settings
     iterations_per_loop = 200
-    save_checkpoints_steps = 1000
+    save_checkpoints_steps = 10000
     num_train_steps = training_steps
     num_eval_steps = 100
     keep_checkpoint_max = 5 # maximum number of recent checkpoint files to keep;
@@ -129,6 +129,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
         #dataset = task.build_inputs(config.train_data)
         # TODO replace with openwebtext
         dataset = tf.data.Dataset.load(os.path.join(data_dir, 'ptb_text_only', ''))
+        dist_dataset = strategy.experimental_distribute_dataset(dataset)
         
         optimizer = optimization.create_optimizer(
             init_lr=learning_rate,
@@ -156,7 +157,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
 
 
         step_count = 0 
-        iterator = iter(dataset)
+        iterator = iter(dist_dataset)
         csvpath = os.path.join(ckpt_path, 'pretrain_metrics.csv')
         print(csvpath)
         with open(csvpath, 'w', newline='') as csvfile:
@@ -164,12 +165,12 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
             for _ in range(num_train_steps):
-                if(step_count % save_checkpoints_steps == 0):
-                    checkpoint_manager.save()
-                task.train_step(next(iterator), model, optimizer, metrics=metrics)
+                strategy.experimental_run_v2(task.train_step(next(iterator), model, optimizer, metrics=metrics))
                 metric_results = dict([(metric.name, metric.result().numpy()) for metric in metrics])
                 metric_results['step'] = step_count
-                writer.writerow(metric_results)
+                if(step_count % save_checkpoints_steps == 0):
+                    checkpoint_manager.save()
+                    writer.writerow(metric_results)
                 step_count = step_count + 1
     
 
