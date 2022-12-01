@@ -109,67 +109,68 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     # # build distribution strategy (directly from https://www.tensorflow.org/tfmodels/orbit)
     # logical_device_names = [logical_device.name for logical_device in tf.config.list_logical_devices()]
 
-    # if 'GPU' in ''.join(logical_device_names):
-    #   strategy = tf.distribute.MirroredStrategy()
-    # elif 'TPU' in ''.join(logical_device_names):
-    #   resolver = tf.distribute.cluster_resolver.TPUClusterResolver(tpu='')
-    #   tf.config.experimental_connect_to_cluster(resolver)
-    #   tf.tpu.experimental.initialize_tpu_system(resolver)
-    #   strategy = tf.distribute.TPUStrategy(resolver)
-    # else:
-    #   strategy = tf.distribute.OneDeviceStrategy(logical_device_names[0])
+    if 'GPU' in ''.join(logical_device_names):
+      strategy = tf.distribute.MirroredStrategy()
+    elif 'TPU' in ''.join(logical_device_names):
+      resolver = tf.distribute.cluster_resolver.TPUClusterResolver(tpu='')
+      tf.config.experimental_connect_to_cluster(resolver)
+      tf.tpu.experimental.initialize_tpu_system(resolver)
+      strategy = tf.distribute.TPUStrategy(resolver)
+    else:
+      strategy = tf.distribute.OneDeviceStrategy(logical_device_names[0])
 
    
     task = electra_task.ElectraPretrainTask(config)
     
+    with strategy.scope():
         
-    model = task.build_model()
-    metrics = task.build_metrics()
-    #dataset = task.build_inputs(config.train_data)
-    # TODO replace with openwebtext
-    dataset = tf.data.Dataset.load(os.path.join(data_dir, 'ptb_text_only', ''))
-    
-    optimizer = optimization.create_optimizer(
-        init_lr=learning_rate,
-        num_train_steps=num_train_steps,
-        num_warmup_steps=num_warmup_steps,
-        end_lr=0.0,
-        poly_power=lr_decay_power,
-        optimizer_type='adamw' # same as google
-        )
+        model = task.build_model()
+        metrics = task.build_metrics()
+        #dataset = task.build_inputs(config.train_data)
+        # TODO replace with openwebtext
+        dataset = tf.data.Dataset.load(os.path.join(data_dir, 'ptb_text_only', ''))
+        
+        optimizer = optimization.create_optimizer(
+            init_lr=learning_rate,
+            num_train_steps=num_train_steps,
+            num_warmup_steps=num_warmup_steps,
+            end_lr=0.0,
+            poly_power=lr_decay_power,
+            optimizer_type='adamw' # same as google
+            )
 
-    ckpt_path = os.path.join(data_dir, 'model_ckpts', model_name, '')
-    if not os.path.exists(ckpt_path):
-        os.mkdir(ckpt_path)
-
-
-    # only want to save out the discriminator because that's what we're fine-tuning
-    checkpoint = tf.train.Checkpoint(model=model.discriminator_network, optimizer=optimizer)
-    checkpoint_manager = tf.train.CheckpointManager(
-        checkpoint,
-        directory=ckpt_path,
-        max_to_keep=keep_checkpoint_max,
-        step_counter=optimizer.iterations,
-        checkpoint_interval=save_checkpoints_steps,
-        init_fn=None)
+        ckpt_path = os.path.join(data_dir, 'model_ckpts', model_name, '')
+        if not os.path.exists(ckpt_path):
+            os.mkdir(ckpt_path)
 
 
-    step_count = 0 
-    iterator = iter(dataset)
-    csvpath = os.path.join(ckpt_path, 'pretrain_metrics.csv')
-    print(csvpath)
-    with open(csvpath, 'w', newline='') as csvfile:
-        fieldnames = ['step','total_loss', 'discriminator_loss', 'lm_example_loss', 'effective_masking_rate', 'discriminator_accuracy', 'masked_lm_accuracy']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-        for _ in range(num_train_steps):
-            if(step_count % save_checkpoints_steps == 0):
-                checkpoint_manager.save()
-            task.train_step(next(iterator), model, optimizer, metrics=metrics)
-            metric_results = dict([(metric.name, metric.result().numpy()) for metric in metrics])
-            metric_results['step'] = step_count
-            writer.writerow(metric_results)
-            step_count = step_count + 1
+        # only want to save out the discriminator because that's what we're fine-tuning
+        checkpoint = tf.train.Checkpoint(model=model.discriminator_network, optimizer=optimizer)
+        checkpoint_manager = tf.train.CheckpointManager(
+            checkpoint,
+            directory=ckpt_path,
+            max_to_keep=keep_checkpoint_max,
+            step_counter=optimizer.iterations,
+            checkpoint_interval=save_checkpoints_steps,
+            init_fn=None)
+
+
+        step_count = 0 
+        iterator = iter(dataset)
+        csvpath = os.path.join(ckpt_path, 'pretrain_metrics.csv')
+        print(csvpath)
+        with open(csvpath, 'w', newline='') as csvfile:
+            fieldnames = ['step','total_loss', 'discriminator_loss', 'lm_example_loss', 'effective_masking_rate', 'discriminator_accuracy', 'masked_lm_accuracy']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+            for _ in range(num_train_steps):
+                if(step_count % save_checkpoints_steps == 0):
+                    checkpoint_manager.save()
+                task.train_step(next(iterator), model, optimizer, metrics=metrics)
+                metric_results = dict([(metric.name, metric.result().numpy()) for metric in metrics])
+                metric_results['step'] = step_count
+                writer.writerow(metric_results)
+                step_count = step_count + 1
     
 
 
