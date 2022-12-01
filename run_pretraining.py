@@ -128,6 +128,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     #dataset = task.build_inputs(config.train_data)
     # TODO replace with openwebtext
     dataset = tf.data.Dataset.load(os.path.join(data_dir, 'ptb_text_only', ''))
+    dataset = dataset.unbatch()
     dataset = dataset.batch(train_batch_size)
     dataset = dataset.shuffle(10000, reshuffle_each_iteration=True)
     dataset = dataset.repeat()
@@ -161,6 +162,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
 
     step_count = 0 
     iterator = iter(dataset)
+    assert next(iterator).shape == (128, 128)
     csvpath = os.path.join(ckpt_path, 'pretrain_metrics.csv')
     print(csvpath)
     with open(csvpath, 'w', newline='') as csvfile:
