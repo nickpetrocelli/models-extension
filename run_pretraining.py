@@ -167,7 +167,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
             for _ in range(num_train_steps):
-                task.train_step(next(iterator), model, optimizer, metrics=metrics)
+                strategy.run(task.train_step(next(iterator), model, optimizer, metrics=metrics))
                 metric_results = dict([(metric.name, metric.result().numpy()) for metric in metrics])
                 metric_results['step'] = step_count
                 if(step_count % save_checkpoints_steps == 0):
