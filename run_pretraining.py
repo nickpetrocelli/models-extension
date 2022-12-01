@@ -104,57 +104,57 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
         config = None
         raise ValueError(f"Size {model_size} not yet supported.")
 
-    # build distribution strategy (directly from https://www.tensorflow.org/tfmodels/orbit)
-    logical_device_names = [logical_device.name for logical_device in tf.config.list_logical_devices()]
+    # # build distribution strategy (directly from https://www.tensorflow.org/tfmodels/orbit)
+    # logical_device_names = [logical_device.name for logical_device in tf.config.list_logical_devices()]
 
-    if 'GPU' in ''.join(logical_device_names):
-      strategy = tf.distribute.MirroredStrategy()
-    elif 'TPU' in ''.join(logical_device_names):
-      resolver = tf.distribute.cluster_resolver.TPUClusterResolver(tpu='')
-      tf.config.experimental_connect_to_cluster(resolver)
-      tf.tpu.experimental.initialize_tpu_system(resolver)
-      strategy = tf.distribute.TPUStrategy(resolver)
-    else:
-      strategy = tf.distribute.OneDeviceStrategy(logical_device_names[0])
+    # if 'GPU' in ''.join(logical_device_names):
+    #   strategy = tf.distribute.MirroredStrategy()
+    # elif 'TPU' in ''.join(logical_device_names):
+    #   resolver = tf.distribute.cluster_resolver.TPUClusterResolver(tpu='')
+    #   tf.config.experimental_connect_to_cluster(resolver)
+    #   tf.tpu.experimental.initialize_tpu_system(resolver)
+    #   strategy = tf.distribute.TPUStrategy(resolver)
+    # else:
+    #   strategy = tf.distribute.OneDeviceStrategy(logical_device_names[0])
 
    
     task = electra_task.ElectraPretrainTask(config)
     metrics = task.build_metrics()
-    with strategy.scope():
+    # with strategy.scope():
         
-        model = task.build_model()
-        
-        
-        #dataset = task.build_inputs(config.train_data)
-        # TODO replace with openwebtext
-        dataset = tf.data.Dataset.load(os.path.join(data_dir, 'ptb_text_only', ''))
-        assert next(iter(dataset)).shape[0] = 128
-        raise ValueError("batching correct?")
-        # dist_dataset = strategy.experimental_distribute_dataset(dataset)
-        
-        optimizer = optimization.create_optimizer(
-            init_lr=learning_rate,
-            num_train_steps=num_train_steps,
-            num_warmup_steps=num_warmup_steps,
-            end_lr=0.0,
-            poly_power=lr_decay_power,
-            optimizer_type='adamw' # same as google
-            )
+    model = task.build_model()
+    
+    
+    #dataset = task.build_inputs(config.train_data)
+    # TODO replace with openwebtext
+    dataset = tf.data.Dataset.load(os.path.join(data_dir, 'ptb_text_only', ''))
+    dataset.batch(train_batch_size)
+    
+    # dist_dataset = strategy.experimental_distribute_dataset(dataset)
+    
+    optimizer = optimization.create_optimizer(
+        init_lr=learning_rate,
+        num_train_steps=num_train_steps,
+        num_warmup_steps=num_warmup_steps,
+        end_lr=0.0,
+        poly_power=lr_decay_power,
+        optimizer_type='adamw' # same as google
+        )
 
-        ckpt_path = os.path.join(data_dir, 'model_ckpts', model_name, '')
-        if not os.path.exists(ckpt_path):
-            os.mkdir(ckpt_path)
+    ckpt_path = os.path.join(data_dir, 'model_ckpts', model_name, '')
+    if not os.path.exists(ckpt_path):
+        os.mkdir(ckpt_path)
 
 
-        # only want to save out the discriminator because that's what we're fine-tuning
-        checkpoint = tf.train.Checkpoint(model=model.discriminator_network, optimizer=optimizer)
-        checkpoint_manager = tf.train.CheckpointManager(
-            checkpoint,
-            directory=ckpt_path,
-            max_to_keep=keep_checkpoint_max,
-            step_counter=optimizer.iterations,
-            checkpoint_interval=save_checkpoints_steps,
-            init_fn=None)
+    # only want to save out the discriminator because that's what we're fine-tuning
+    checkpoint = tf.train.Checkpoint(model=model.discriminator_network, optimizer=optimizer)
+    checkpoint_manager = tf.train.CheckpointManager(
+        checkpoint,
+        directory=ckpt_path,
+        max_to_keep=keep_checkpoint_max,
+        step_counter=optimizer.iterations,
+        checkpoint_interval=save_checkpoints_steps,
+        init_fn=None)
 
 
     step_count = 0 
