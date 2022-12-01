@@ -90,22 +90,6 @@ def bert_pretrain_preprocess(inputs):
   return model_inputs
 
 
-
-# stolen from https://www.tensorflow.org/tfmodels/nlp/fine_tune_bert
-class BertInputProcessor(tf.keras.layers.Layer):
-  def __init__(self, tokenizer, packer):
-    super().__init__()
-    self.tokenizer = tokenizer
-    self.packer = packer
-
-  def call(self, inputs):
-    tok1 = self.tokenizer(inputs)
-
-    packed = self.packer([tok1])
-
-    return packed
-
-
 def main(data_dir):
     # dummy data for testing
     # examples = [

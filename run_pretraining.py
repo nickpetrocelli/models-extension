@@ -84,17 +84,17 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
             num_masked_tokens=20,
             sequence_length=max_seq_length,
             cls_heads=[
-                # bert.ClsHeadConfig(
-                #     inner_dim=256, #NRP NOTE: should be 256 for electra small; 12 hidden layers
-                #     num_classes=2,
-                #     dropout_rate=0.1,
-                #     name='next_sentence'
-                # )
+                bert.ClsHeadConfig(
+                    inner_dim=256, #NRP NOTE: should be 256 for electra small; 12 hidden layers
+                    num_classes=2,
+                    dropout_rate=0.1,
+                    name='next_sentence'
+                )
             ]),
         #dummy?
         train_data=pretrain_dataloader.BertPretrainDataConfig(
             tfds_name=None,
-            dataset_path=os.path.join(data_dir, 'ptb_text_only', ''),
+            dataset_path=os.path.join(data_dir, 'ptb_text_only', ''), # not actually used
             max_predictions_per_seq=20,
             seq_length=max_seq_length,
             use_v2_feature_names = True,
@@ -124,9 +124,9 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     
         
     model = task.build_model()
-    # TODO augment with EMR estimate
     metrics = task.build_metrics()
     #dataset = task.build_inputs(config.train_data)
+    # TODO replace with openwebtext
     dataset = tf.data.Dataset.load(os.path.join(data_dir, 'ptb_text_only', ''))
     
     optimizer = optimization.create_optimizer(
@@ -143,7 +143,8 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
         os.mkdir(ckpt_path)
 
 
-    checkpoint = tf.train.Checkpoint(model=model, optimizer=optimizer)
+    # only want to save out the discriminator because that's what we're fine-tuning
+    checkpoint = tf.train.Checkpoint(model=model.discriminator_network, optimizer=optimizer)
     checkpoint_manager = tf.train.CheckpointManager(
         checkpoint,
         directory=ckpt_path,
