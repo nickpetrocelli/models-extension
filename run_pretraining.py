@@ -128,9 +128,9 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     #dataset = task.build_inputs(config.train_data)
     # TODO replace with openwebtext
     dataset = tf.data.Dataset.load(os.path.join(data_dir, 'ptb_text_only', ''))
-    dataset.batch(train_batch_size)
-    dataset.shuffle(10000, reshuffle_each_iteration=True)
-    dataset.repeat()
+    dataset = dataset.batch(train_batch_size)
+    dataset = dataset.shuffle(10000, reshuffle_each_iteration=True)
+    dataset = dataset.repeat()
     
     # dist_dataset = strategy.experimental_distribute_dataset(dataset)
     
