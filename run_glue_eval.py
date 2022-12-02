@@ -128,7 +128,7 @@ TASK_FEATURES = {
     'glue/wnli': ['sentence1', 'sentence2']
 }
 
-def main(data_dir, model_name):
+def main(data_dir, model_name, ckpt_num):
     tf.get_logger().setLevel('ERROR') #TODO maybe don't want to do this?
     
     # always using a GPU
@@ -136,7 +136,7 @@ def main(data_dir, model_name):
     print('Using GPU')
 
     # TODO filename? Just get the last one?
-    weights_path = os.path.join(data_dir, 'model_ckpts', model_name, 'TODO')
+    weights_path = os.path.join(data_dir, 'model_ckpts', model_name, f'chkpt-{ckpt_num}.data-00000-of-00001')
 
 
     # define encoder same as pretraining
@@ -272,6 +272,7 @@ if __name__ == '__main__':
                       help="Location of data files (model weights, etc).")
     parser.add_argument("--model-name", required=True,
                           help="The name of the model being fine-tuned.")
+    parser.add_argument("--ckpt-num", required=True, help="number of the checkpoint to load.")
     args = parser.parse_args()
     
-    main(args.data_dir, args.model_name, args.training_epochs)
+    main(args.data_dir, args.model_name, args.ckpt_num)
