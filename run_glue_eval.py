@@ -138,7 +138,7 @@ def main(data_dir, model_name, ckpt_num):
     # TODO filename? Just get the last one?
     weights_path = os.path.join(data_dir, 'model_ckpts', model_name, f'chkpt-{ckpt_num}.data-00000-of-00001')
 
-
+    max_seq_length = 128
     # define encoder same as pretraining
     config = electra_task.ElectraPretrainConfig(
         model=electra.ElectraPretrainerConfig(
