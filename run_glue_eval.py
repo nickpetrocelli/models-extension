@@ -90,7 +90,7 @@ def get_configuration(glue_task):
 
     if glue_task == 'glue/cola':
         metrics = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=2)
-     else:
+    else:
         metrics = tf.keras.metrics.SparseCategoricalAccuracy(
             'accuracy', dtype=tf.float32)
 
