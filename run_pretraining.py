@@ -21,6 +21,8 @@ from official.nlp.tasks import electra_task
 from official.nlp.data import sentence_prediction_dataloader
 from official.nlp import optimization
 
+from preprocess_openwebtext import bert_pretrain_preprocess
+
 
 # # functions for running orbit interface
 # def trainer_init(self,
@@ -123,15 +125,41 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     # with strategy.scope():
         
     model = task.build_model()
+
+
+    storage_dir = '/data/people/npetroce'
+    #dataset = hfds.load_dataset("ptb_text_only", split="train")
+    dataset = hfds.load_dataset("openwebtext", split="train", cache_dir=os.path.join(storage_dir, "huggingface_cache", ""))
+
+
+    # dataset_tensors = dataset.to_tf_dataset(
+    #         columns=["sentence"],
+    #         batch_size = 128, # TODO same as model spec
+    #         shuffle=True, 
+    #     )
+
+    dataset_tensors = dataset.to_tf_dataset(
+            columns=["text"],
+            batch_size = 128, # TODO same as model spec
+            shuffle=False, 
+        )
+
+    # preprocess
+    packed_data = dataset_tensors.map(bert_pretrain_preprocess)
+    packed_data = packed_data.unbatch()
+    packed_data = packed_data.batch(train_batch_size)
+    packed_data = packed_data.shuffle(10000, reshuffle_each_iteration=True)
+    packed_data = packed_data.repeat()
+
     
     
     #dataset = task.build_inputs(config.train_data)
     # TODO replace with openwebtext
-    dataset = tf.data.Dataset.load(os.path.join(data_dir, 'ptb_text_only', ''))
-    dataset = dataset.unbatch()
-    dataset = dataset.batch(train_batch_size)
-    dataset = dataset.shuffle(10000, reshuffle_each_iteration=True)
-    dataset = dataset.repeat()
+    # dataset = tf.data.Dataset.load(os.path.join(data_dir, 'ptb_text_only', ''))
+    # dataset = dataset.unbatch()
+    # dataset = dataset.batch(train_batch_size)
+    # dataset = dataset.shuffle(10000, reshuffle_each_iteration=True)
+    # dataset = dataset.repeat()
     
     # dist_dataset = strategy.experimental_distribute_dataset(dataset)
     
@@ -161,7 +189,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
 
 
     step_count = 0 
-    iterator = iter(dataset)
+    iterator = iter(packed_data)
     #assert next(iterator).shape == (128, 128)
     csvpath = os.path.join(ckpt_path, 'pretrain_metrics.csv')
     print(csvpath)
