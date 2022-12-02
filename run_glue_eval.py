@@ -186,7 +186,7 @@ def main(data_dir, model_name, ckpt_num):
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         # iterate over each task
-        for tfds_name, str_features in enumerate(TASK_FEATURES):
+        for tfds_name, str_features in TASK_FEATURES.items():
 
             training_epochs = 10 if tfds_name in ['glue/stsb', 'glue/rte'] else 3
 
