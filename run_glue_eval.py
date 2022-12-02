@@ -212,7 +212,7 @@ def main(data_dir, model_name, ckpt_num):
             in_memory_ds = tfds.load(tfds_name, batch_size=-1, shuffle_files=True)
 
             out_dict = {'task': tfds_name.split('/')[1]}
-            bert_preprocess_model = make_bert_preprocess_model(sentence_features)
+            bert_preprocess_model = make_bert_preprocess_model(str_features)
 
             # run 5 times for stats reasons
             for run_idx in range(5):
