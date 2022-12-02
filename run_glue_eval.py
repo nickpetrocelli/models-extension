@@ -17,7 +17,7 @@ from official.nlp.configs import electra
 from official.nlp.configs import encoders
 from official.nlp.data import pretrain_dataloader
 from official.nlp.tasks import electra_task
-from official.nlp.modeling import bert_classifier
+from official.nlp.modeling.models import bert_classifier
 
 from official.nlp.data import sentence_prediction_dataloader
 from official.nlp import optimization

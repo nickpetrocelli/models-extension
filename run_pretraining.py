@@ -21,6 +21,8 @@ from official.nlp.tasks import electra_task
 from official.nlp.data import sentence_prediction_dataloader
 from official.nlp import optimization
 
+import datasets as hfds
+
 from preprocess_openwebtext import bert_pretrain_preprocess
 
 
