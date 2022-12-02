@@ -206,7 +206,7 @@ def main(data_dir, model_name, ckpt_num):
             print(f'Using {tfds_name} from TFDS')
             print(f'This dataset has {num_examples} examples')
             print(f'Number of classes: {num_classes}')
-            print(f'Features {sentence_features}')
+            print(f'Features {str_features}')
             print(f'Splits {available_splits}')
 
             in_memory_ds = tfds.load(tfds_name, batch_size=-1, shuffle_files=True)
