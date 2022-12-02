@@ -224,7 +224,7 @@ def main(data_dir, model_name, ckpt_num):
                     train_dataset, train_data_size = load_dataset_from_tfds(
                       in_memory_ds, tfds_info, train_split, batch_size, bert_preprocess_model)
                     steps_per_epoch = train_data_size // batch_size
-                    num_train_steps = steps_per_epoch * epochs
+                    num_train_steps = steps_per_epoch * training_epochs
                     num_warmup_steps = num_train_steps // 10
 
                     validation_dataset, validation_data_size = load_dataset_from_tfds(
