@@ -169,7 +169,12 @@ def main(data_dir, model_name, ckpt_num):
             use_next_sentence_label = False,
             global_batch_size=128))
 
-    csvpath = os.path.join(data_dir, 'eval_runs', model_name, 'eval_results.csv')
+    
+    csvpath = os.path.join(data_dir, 'eval_runs', model_name, '')
+    if not os.path.exists(csvpath):
+        os.mkdir(csvpath)
+
+    csvpath = os.path.join(csvpath, 'eval_results.csv')
 
     batch_size = 32
     init_lr = 3e-4 # Same as ELECTRA-small
