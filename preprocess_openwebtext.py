@@ -106,7 +106,7 @@ def main(data_dir):
     # TODO hardcoded? not sure I really care
     storage_dir = '/data/people/npetroce'
     #dataset = hfds.load_dataset("ptb_text_only", split="train")
-    dataset = hfds.load_dataset("openwebtext", split="plain_text", cache_dir=os.path.join(storage_dir, "huggingface_cache", ""))
+    dataset = hfds.load_dataset("openwebtext", split="train", cache_dir=os.path.join(storage_dir, "huggingface_cache", ""))
 
 
     # dataset_tensors = dataset.to_tf_dataset(

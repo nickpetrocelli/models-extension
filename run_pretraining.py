@@ -162,7 +162,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
 
     step_count = 0 
     iterator = iter(dataset)
-    assert next(iterator).shape == (128, 128)
+    #assert next(iterator).shape == (128, 128)
     csvpath = os.path.join(ckpt_path, 'pretrain_metrics.csv')
     print(csvpath)
     with open(csvpath, 'w', newline='') as csvfile:
