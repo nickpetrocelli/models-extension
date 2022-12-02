@@ -142,6 +142,13 @@ def main(data_dir, model_name, ckpt_num):
     # define encoder same as pretraining
     config = electra_task.ElectraPretrainConfig(
         model=electra.ElectraPretrainerConfig(
+            generator_encoder=encoders.EncoderConfig(
+                bert=encoders.BertEncoderConfig(vocab_size=30522,
+                                                hidden_size=256,
+                                                num_attention_heads=4,
+                                                intermediate_size=1024,
+                                                embedding_size=128
+                                                )),
             discriminator_encoder=encoders.EncoderConfig(
                  bert=encoders.BertEncoderConfig(vocab_size=30522,
                                                 hidden_size=256,
