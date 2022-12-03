@@ -294,4 +294,4 @@ if __name__ == '__main__':
                           help="The name of the model being fine-tuned.")
     args = parser.parse_args()
     
-    main(args.data_dir, args.model_name, args.ckpt_num)
+    main(args.data_dir, args.model_name)
