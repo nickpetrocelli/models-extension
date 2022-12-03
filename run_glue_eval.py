@@ -98,11 +98,8 @@ def get_configuration(glue_task):
 
 
 # build a simple linear classifier over encoder
-def build_classifier_model(num_classes, encoder_model, encoder_weights_path):
-    # from https://www.tensorflow.org/guide/keras/save_and_serialize
-
-    load_status = encoder_model.load_weights(encoder_weights_path)
-    load_status.assert_consumed()
+def build_classifier_model(num_classes, encoder_model):
+    
 
     classifier_model = bert_classifier.BertClassifier(
         encoder_model,
@@ -248,13 +245,24 @@ def main(data_dir, model_name, ckpt_num):
         
                     task_model = task.build_model()
 
-                    classifier_model = build_classifier_model(num_classes, task_model.discriminator_network, weights_path)
-
                     optimizer = optimization.create_optimizer(
                         init_lr=init_lr,
                         num_train_steps=num_train_steps,
                         num_warmup_steps=num_warmup_steps,
                         optimizer_type='adamw')
+
+                    checkpoint = tf.train.Checkpoint(task_model.discriminator_network)
+                    checkpoint_manager = tf.train.CheckpointManager(
+                                        checkpoint,
+                                        directory=ckpt_path,
+                                        max_to_keep=keep_checkpoint_max)
+                    rest_path = checkpoint_manager.restore_or_initialize()
+                    assert rest_path is not None
+
+
+                    classifier_model = build_classifier_model(num_classes, task_model.discriminator_network)
+
+                    
 
                     classifier_model.compile(optimizer=optimizer, loss=loss, metrics=[metrics])
 
