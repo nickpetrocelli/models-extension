@@ -133,7 +133,7 @@ def main(data_dir, model_name, ckpt_num):
     print('Using GPU')
 
     # TODO filename? Just get the last one?
-    weights_path = os.path.join(data_dir, 'model_ckpts', model_name, f'ckpt-{ckpt_num}.data-00000-of-00001')
+    ckpt_path = os.path.join(data_dir, 'model_ckpts', model_name, '')
 
     max_seq_length = 128
     # define encoder same as pretraining
@@ -255,7 +255,7 @@ def main(data_dir, model_name, ckpt_num):
                     checkpoint_manager = tf.train.CheckpointManager(
                                         checkpoint,
                                         directory=ckpt_path,
-                                        max_to_keep=keep_checkpoint_max)
+                                        max_to_keep=5)
                     rest_path = checkpoint_manager.restore_or_initialize()
                     assert rest_path is not None
 
@@ -292,7 +292,6 @@ if __name__ == '__main__':
                       help="Location of data files (model weights, etc).")
     parser.add_argument("--model-name", required=True,
                           help="The name of the model being fine-tuned.")
-    parser.add_argument("--ckpt-num", required=True, help="number of the checkpoint to load.")
     args = parser.parse_args()
     
     main(args.data_dir, args.model_name, args.ckpt_num)
