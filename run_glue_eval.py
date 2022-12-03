@@ -125,7 +125,7 @@ TASK_FEATURES = {
     'glue/wnli': ['sentence1', 'sentence2']
 }
 
-def main(data_dir, model_name, ckpt_num):
+def main(data_dir, model_name):
     tf.get_logger().setLevel('ERROR') #TODO maybe don't want to do this?
     
     # always using a GPU
