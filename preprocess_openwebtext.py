@@ -91,17 +91,7 @@ def bert_pretrain_preprocess(inputs):
 
 
 def main(data_dir):
-    # dummy data for testing
-    # examples = [
-    #       "Sponge bob Squarepants is an Avenger",
-    #       "Marvel Avengers",
-    #       "Marvel Avengers",
-    #       "Marvel Avengers"
-    # ],
-
-    # dummy_dataset = tf.data.Dataset.from_tensor_slices(examples)
-    # print(_tokenizer(next(iter(dummy_dataset))))
-
+   
     # data dir? TODO
     # TODO hardcoded? not sure I really care
     storage_dir = '/data/people/npetroce'
@@ -118,49 +108,13 @@ def main(data_dir):
     dataset_tensors = dataset.to_tf_dataset(
             columns=["text"],
             batch_size = 128, # TODO same as model spec
-            shuffle=True, 
+            shuffle=False, 
         )
 
-    # print(next(iter(dataset_tensors)))
-    # print(_tokenizer(next(iter(dataset_tensors))))
-
-    # dataset_tensors_2 = dataset.to_tf_dataset(
-    #         columns=[],
-    #         batch_size = 128, # TODO same as model spec
-    #         shuffle=True, 
-    #     )
-    # print(next(iter(dataset_tensors_2)))
-    # print(_tokenizer(next(iter(dataset_tensors_2))['sentence']))
-
-    # segments = [_tokenizer(next(iter(dataset_tensors))).merge_dims(
-    #   1, -1)]
-    # print(segments)
-
-    # dummy_dataset.batch(2)
-
-    # packed_dummy = dummy_dataset.map(bert_pretrain_preprocess)
-    # print(next(iter(packed_dummy)))
-    # packed_dummy.save(os.path.join(data_dir, 'dummy_data', ''))
-
-    # from https://tfhub.dev/google/electra_small/2
-    #preprocess = hub.load('https://tfhub.dev/tensorflow/bert_en_uncased_preprocess/3')
-
-    # # https://www.tensorflow.org/tfmodels/nlp/fine_tune_bert
-    # tokenizer = tfm_layers.FastWordpieceBertTokenizer(
-    #     vocab_file=os.path.join(data_dir, "vocab.txt"),
-    #     lower_case=True)
-
-    # max_seq_length = 128 # same as model specification in run_pretraining.py
-
-    # packer = tfm_layers.BertPackInputs(
-    #     seq_length=max_seq_length,
-    #     special_tokens_dict = tokenizer.get_special_tokens_dict())
-
-    # bert_inputs_processor = BertInputProcessor(tokenizer, packer)
 
     packed_data = dataset_tensors.map(bert_pretrain_preprocess)
     # packed_data.repeat()
-    print(next(iter(packed_data)))
+    #print(next(iter(packed_data)))
     # # save it out
     #output_path = os.path.join(data_dir, 'ptb_text_only', '')
     output_path = os.path.join(storage_dir, 'openwebtext_packed', '')
