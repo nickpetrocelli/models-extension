@@ -318,7 +318,7 @@ if __name__ == '__main__':
                       help="Location of data files (model weights, etc).")
     parser.add_argument("--model-name", required=True,
                           help="The name of the model being fine-tuned.")
-    parser.add_argument("--num-runs", required=False, type=int, default=5
+    parser.add_argument("--num-runs", required=False, type=int, default=5,
                           help="Number of test runs to perform on each dataset before calculating average.")
     args = parser.parse_args()
     
