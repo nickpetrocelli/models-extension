@@ -93,10 +93,12 @@ def bert_pretrain_preprocess(inputs):
 
 def clean_unicode_openwebtext(entry):
     entry['text'] = entry['text'].encode('ascii', 'ignore')
+
+STORAGE_DIR = '/data/people/npetroce'
+
  
 def dataset_conversion_generator():
-    storage_dir = '/data/people/npetroce'
-    hf_dataset = hfds.load_dataset("openwebtext", split="train", cache_dir=os.path.join(storage_dir, "huggingface_cache", ""))
+    hf_dataset = hfds.load_dataset("openwebtext", split="train", cache_dir=os.path.join(STORAGE_DIR, "huggingface_cache", ""))
     hf_iterator = iter(hf_dataset)
     for entry in hf_iterator:
         yield tf.convert_to_tensor(entry['text'])
@@ -132,7 +134,7 @@ def main(data_dir):
     #print(next(iter(packed_data)))
     # # save it out
     #output_path = os.path.join(data_dir, 'ptb_text_only', '')
-    output_path = os.path.join(storage_dir, 'openwebtext_packed', '')
+    output_path = os.path.join(STORAGE_DIR, 'openwebtext_packed', '')
     #output_path = os.path.join(storage_dir, 'wikipedia_packed', '')
     packed_data.save(output_path)
 
