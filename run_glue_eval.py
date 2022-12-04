@@ -290,14 +290,12 @@ def main(data_dir, model_name, num_runs):
                     # testing against dev set as in paper
                     test_results = classifier_model.evaluate(x=validation_dataset)
                     if tfds_name == 'glue/cola':
-                        run_results.append(test_results['matthews_correlation_coefficient'])
                         out_dict['metric'] = 'MC'
                     elif tfds_name == 'glue/stsb':
-                        run_results.append(test_results['spearman_rankcor'])
                         out_dict['metric'] = 'Spearman'
                     else:
-                        run_results.append(test_results['accuracy'])
                         out_dict['metric'] = 'acc'
+                    run_results.append(test_results[1])
 
             out_dict['mean'] = np.mean(run_results)
             out_dict['median'] = np.median(run_results)
