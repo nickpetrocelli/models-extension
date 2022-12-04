@@ -91,7 +91,7 @@ def bert_pretrain_preprocess(inputs):
 
 
 def clean_unicode_openwebtext(entry):
-    entry['text'] = entry['text'].encode('ascii', 'ignore').decode('ascii')
+    entry['text'] = entry['text'].encode('ascii', 'ignore')
     
 
 
@@ -101,8 +101,10 @@ def main(data_dir):
     # TODO hardcoded? not sure I really care
     storage_dir = '/data/people/npetroce'
     #dataset = hfds.load_dataset("ptb_text_only", split="train")
-    dataset = hfds.load_dataset("openwebtext", split="train", cache_dir=os.path.join(storage_dir, "huggingface_cache", ""))
-    cleaned_dataset = dataset.map(clean_unicode_openwebtext)
+    #dataset = hfds.load_dataset("openwebtext", split="train", cache_dir=os.path.join(storage_dir, "huggingface_cache", ""))
+    #cleaned_dataset = dataset.map(clean_unicode_openwebtext)
+
+    datasethfds.load_dataset("wikipedia", "20220301.en", split="train", cache_dir=os.path.join(storage_dir, "huggingface_cache", ""))
 
 
     # dataset_tensors = dataset.to_tf_dataset(
@@ -111,7 +113,7 @@ def main(data_dir):
     #         shuffle=True, 
     #     )
 
-    dataset_tensors = cleaned_dataset.to_tf_dataset(columns=["text"], batch_size = 1, shuffle=False,)
+    dataset_tensors = dataset.to_tf_dataset(columns=["text"], batch_size = 1, shuffle=False,)
 
 
     packed_data = dataset_tensors.map(bert_pretrain_preprocess)
@@ -119,7 +121,8 @@ def main(data_dir):
     #print(next(iter(packed_data)))
     # # save it out
     #output_path = os.path.join(data_dir, 'ptb_text_only', '')
-    output_path = os.path.join(storage_dir, 'openwebtext_packed', '')
+    #output_path = os.path.join(storage_dir, 'openwebtext_packed', '')
+    output_path = os.path.join(storage_dir, 'wikipedia_packed', '')
     packed_data.save(output_path)
 
 
