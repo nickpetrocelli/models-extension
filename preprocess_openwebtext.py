@@ -104,7 +104,7 @@ def main(data_dir):
     #dataset = hfds.load_dataset("openwebtext", split="train", cache_dir=os.path.join(storage_dir, "huggingface_cache", ""))
     #cleaned_dataset = dataset.map(clean_unicode_openwebtext)
 
-    datasethfds.load_dataset("wikipedia", "20220301.en", split="train", cache_dir=os.path.join(storage_dir, "huggingface_cache", ""))
+    dataset = hfds.load_dataset("wikipedia", "20220301.en", split="train", cache_dir=os.path.join(storage_dir, "huggingface_cache", ""))
 
 
     # dataset_tensors = dataset.to_tf_dataset(
