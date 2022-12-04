@@ -94,7 +94,7 @@ def bert_pretrain_preprocess(inputs):
 def clean_unicode_openwebtext(entry):
     entry['text'] = entry['text'].encode('ascii', 'ignore')
  
- def dataset_conversion_generator():
+def dataset_conversion_generator():
     storage_dir = '/data/people/npetroce'
     hf_dataset = hfds.load_dataset("openwebtext", split="train", cache_dir=os.path.join(storage_dir, "huggingface_cache", ""))
     hf_iterator = iter(hf_dataset)
