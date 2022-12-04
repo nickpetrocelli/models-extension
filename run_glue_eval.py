@@ -26,6 +26,8 @@ import tensorflow_addons as tfa
 import tensorflow_hub as hub
 import tensorflow_datasets as tfds
 import tensorflow_text as text  # A dependency of the preprocessing model
+from scipy.stats import spearmanr
+import numpy as np
 
 
 # from https://www.tensorflow.org/text/tutorials/bert_glue
@@ -84,12 +86,27 @@ def load_dataset_from_tfds(in_memory_ds, info, split, batch_size,
     dataset = dataset.cache().prefetch(buffer_size=AUTOTUNE)
     return dataset, num_examples
 
+
+# https://stackoverflow.com/questions/53404301/how-to-compute-spearman-correlation-in-tensorflow
+def spearman_rankcor(y_true, y_pred):
+     return ( tf.py_function(spearmanr, [tf.cast(y_pred, tf.float32), 
+                       tf.cast(y_true, tf.float32)], Tout = tf.float32) )
+
+def mean_confidence_interval(data, confidence=0.95):
+    a = 1.0 * np.array(data)
+    n = len(a)
+    se = scipy.stats.sem(a)
+    h = se * scipy.stats.t.ppf((1 + confidence) / 2., n - 1)
+    return h
+
 def get_configuration(glue_task):
 
     loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 
     if glue_task == 'glue/cola':
         metrics = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=2)
+    else if glue_task == 'glue/stsb':
+        metrics = spearman_rankcor
     else:
         metrics = tf.keras.metrics.SparseCategoricalAccuracy(
             'accuracy', dtype=tf.float32)
@@ -125,7 +142,7 @@ TASK_FEATURES = {
     'glue/wnli': ['sentence1', 'sentence2']
 }
 
-def main(data_dir, model_name):
+def main(data_dir, model_name, num_runs):
     tf.get_logger().setLevel('ERROR') #TODO maybe don't want to do this?
     
     # always using a GPU
@@ -178,7 +195,7 @@ def main(data_dir, model_name):
     if not os.path.exists(csvpath):
         os.mkdir(csvpath)
 
-    csvpath = os.path.join(csvpath, 'eval_results.csv')
+    csvpath = os.path.join(csvpath, f'eval_results_{num_runs}runs.csv')
 
     batch_size = 32
     init_lr = 3e-4 # Same as ELECTRA-small
@@ -186,7 +203,7 @@ def main(data_dir, model_name):
 
     # open csv for writing results
     with open(csvpath, 'w', newline='') as csvfile:
-        fieldnames = ['task', 'run_1', 'run_2', 'run_3', 'run_4', 'run_5']
+        fieldnames = ['task', 'metric', 'median', 'mean', '95_conf_int']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         # iterate over each task
@@ -218,8 +235,9 @@ def main(data_dir, model_name):
             out_dict = {'task': tfds_name.split('/')[1]}
             bert_preprocess_model = make_bert_preprocess_model(str_features)
 
-            # run 5 times for stats reasons
-            for run_idx in range(5):
+            # run x times
+            run_results = []
+            for run_idx in range(num_runs):
                 with strategy.scope():
 
                     # metric have to be created inside the strategy scope
@@ -236,9 +254,6 @@ def main(data_dir, model_name):
                        bert_preprocess_model)
                     validation_steps = validation_data_size // batch_size
 
-                    test_dataset, test_data_size = load_dataset_from_tfds(
-                       in_memory_ds, tfds_info, test_split, batch_size,
-                       bert_preprocess_model)
 
                     task = electra_task.ElectraPretrainTask(config)
     
@@ -268,14 +283,25 @@ def main(data_dir, model_name):
 
                     classifier_model.fit(
                         x=train_dataset,
-                        validation_data=validation_dataset,
                         steps_per_epoch=steps_per_epoch,
-                        epochs=training_epochs,
-                        validation_steps=validation_steps)
+                        epochs=training_epochs)
 
                     # test and write to file
-                    test_results = classifier_model.evaluate(x=test_dataset)
-                    out_dict[f'run_{run_idx + 1}'] = test_results['matthews_correlation_coefficient'] if tfds_name == 'glue/cola' else test_results['accuracy']
+                    # testing against dev set as in paper
+                    test_results = classifier_model.evaluate(x=validation_dataset)
+                    if tfds_name == 'glue/cola':
+                        run_results.append(test_results['matthews_correlation_coefficient'])
+                        out_dict['metric'] = 'MC'
+                    else if tfds_name == 'glue/stsb':
+                        run_results.append(test_results['spearman_rankcor'])
+                        out_dict['metric'] = 'Spearman'
+                    else:
+                        run_results.append(test_results['accuracy'])
+                        out_dict['metric'] = 'acc'
+
+            out_dict['mean'] = np.mean(run_results)
+            out_dict['median'] = np.median(run_results)
+            out_dict['95_conf_int'] = mean_confidence_interval(run_results)
             
             writer.writerow(out_dict)
                     
@@ -292,6 +318,8 @@ if __name__ == '__main__':
                       help="Location of data files (model weights, etc).")
     parser.add_argument("--model-name", required=True,
                           help="The name of the model being fine-tuned.")
+    parser.add_argument("--num-runs", required=False, type=int, default=5
+                          help="Number of test runs to perform on each dataset before calculating average.")
     args = parser.parse_args()
     
-    main(args.data_dir, args.model_name)
+    main(args.data_dir, args.model_name, args.num_runs)
