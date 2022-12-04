@@ -105,7 +105,7 @@ def get_configuration(glue_task):
 
     if glue_task == 'glue/cola':
         metrics = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=2)
-    else if glue_task == 'glue/stsb':
+    elif glue_task == 'glue/stsb':
         metrics = spearman_rankcor
     else:
         metrics = tf.keras.metrics.SparseCategoricalAccuracy(
@@ -292,7 +292,7 @@ def main(data_dir, model_name, num_runs):
                     if tfds_name == 'glue/cola':
                         run_results.append(test_results['matthews_correlation_coefficient'])
                         out_dict['metric'] = 'MC'
-                    else if tfds_name == 'glue/stsb':
+                    elif tfds_name == 'glue/stsb':
                         run_results.append(test_results['spearman_rankcor'])
                         out_dict['metric'] = 'Spearman'
                     else:
