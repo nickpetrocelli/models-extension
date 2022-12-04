@@ -90,6 +90,11 @@ def bert_pretrain_preprocess(inputs):
   return model_inputs
 
 
+def clean_unicode_openwebtext(entry):
+    entry['text'] = entry['text'].encode('ascii', 'ignore').decode('ascii')
+    
+
+
 def main(data_dir):
    
     # data dir? TODO
@@ -97,6 +102,7 @@ def main(data_dir):
     storage_dir = '/data/people/npetroce'
     #dataset = hfds.load_dataset("ptb_text_only", split="train")
     dataset = hfds.load_dataset("openwebtext", split="train", cache_dir=os.path.join(storage_dir, "huggingface_cache", ""))
+    cleaned_dataset = dataset.map(clean_unicode_openwebtext)
 
 
     # dataset_tensors = dataset.to_tf_dataset(
@@ -105,11 +111,7 @@ def main(data_dir):
     #         shuffle=True, 
     #     )
 
-    dataset_tensors = dataset.to_tf_dataset(
-            columns=["text"],
-            batch_size = 128, # TODO same as model spec
-            shuffle=False, 
-        )
+    dataset_tensors = cleaned_dataset.to_tf_dataset(columns=["text"], batch_size = 1, shuffle=False,)
 
 
     packed_data = dataset_tensors.map(bert_pretrain_preprocess)
