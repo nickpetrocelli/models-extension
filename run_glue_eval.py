@@ -26,8 +26,7 @@ import tensorflow_addons as tfa
 import tensorflow_hub as hub
 import tensorflow_datasets as tfds
 import tensorflow_text as text  # A dependency of the preprocessing model
-from scipy.stats import spearmanr, sem
-from scipy.stats.t import ppf
+import scipy.stats
 import numpy as np
 
 
@@ -90,14 +89,14 @@ def load_dataset_from_tfds(in_memory_ds, info, split, batch_size,
 
 # https://stackoverflow.com/questions/53404301/how-to-compute-spearman-correlation-in-tensorflow
 def spearman_rankcor(y_true, y_pred):
-     return ( tf.py_function(spearmanr, [tf.cast(y_pred, tf.float32), 
+     return ( tf.py_function(scipy.stats.spearmanr, [tf.cast(y_pred, tf.float32), 
                        tf.cast(y_true, tf.float32)], Tout = tf.float32) )
 
 def mean_confidence_interval(data, confidence=0.95):
     a = 1.0 * np.array(data)
     n = len(a)
-    se = sem(a)
-    h = se * ppf((1 + confidence) / 2., n - 1)
+    se = scipy.stats.sem(a)
+    h = se * scipy.stats.t.ppf((1 + confidence) / 2., n - 1)
     return h
 
 def get_configuration(glue_task):
