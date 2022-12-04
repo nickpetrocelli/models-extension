@@ -199,10 +199,11 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
         fieldnames = ['step','total_loss', 'discriminator_loss', 'lm_example_loss', 'effective_masking_rate', 'discriminator_accuracy', 'masked_lm_accuracy']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
-        for _ in range(num_train_steps):
+        for s in range(num_train_steps):
             task.train_step(next(iterator), model, optimizer, metrics=metrics)
             metric_results = dict([(metric.name, metric.result().numpy()) for metric in metrics])
             metric_results['step'] = step_count
+            print(f"Step {s}: {metric_results}")
             if(step_count % save_checkpoints_steps == 0):
                 checkpoint_manager.save()
                 writer.writerow(metric_results)
