@@ -190,8 +190,8 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
             task.train_step(next(iterator), model, optimizer, metrics=metrics)
             metric_results = dict([(metric.name, metric.result().numpy()) for metric in metrics])
             metric_results['step'] = step_count
-            print(f"Step {s}: {metric_results}")
             if(step_count % save_checkpoints_steps == 0):
+                print(f"Step {s}: {metric_results}")
                 checkpoint_manager.save()
                 writer.writerow(metric_results)
             step_count = step_count + 1
