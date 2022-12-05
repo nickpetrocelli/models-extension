@@ -117,29 +117,32 @@ def main(data_dir):
     #dataset = 
     #cleaned_dataset = dataset.map(clean_unicode_openwebtext)
 
-    #dataset = hfds.load_dataset("wikipedia", "20220301.en", split="train", cache_dir=os.path.join(storage_dir, "huggingface_cache", ""))
+    dataset = hfds.load_dataset("openwebtext", split="train", cache_dir=os.path.join(storage_dir, "huggingface_cache", ""))
 
 
-    # dataset_tensors = dataset.to_tf_dataset(
-    #         columns=["sentence"],
-    #         batch_size = 128, # TODO same as model spec
-    #         shuffle=True, 
-    #     )
+    dataset_tensors_old = dataset.to_tf_dataset(
+            columns=["sentence"],
+            batch_size = 128, # TODO same as model spec
+            shuffle=True, 
+        )
 
 
     #dataset_tensors = dataset.to_tf_dataset(columns=["text"], batch_size = 128, shuffle=False,)
     dataset_tensors = tf.data.Dataset.from_generator(dataset_conversion_generator, output_signature = tf.TensorSpec(shape=(), dtype=tf.string))
     dataset_tensors = dataset_tensors.batch(128)
 
+    print(f'old shape'{next(iter(dataset_tensors_old)).shape})
+    print(f'new shape'{next(iter(dataset_tensors)).shape})
 
-    packed_data = dataset_tensors.map(bert_pretrain_preprocess, num_parallel_calls=tf.data.AUTOTUNE, deterministic=False)
-    # packed_data.repeat()
+
+
+    #packed_data = dataset_tensors.map(bert_pretrain_preprocess, num_parallel_calls=tf.data.AUTOTUNE, deterministic=False)
     #print(next(iter(packed_data)))
     # # save it out
     #output_path = os.path.join(data_dir, 'ptb_text_only', '')
     output_path = os.path.join(STORAGE_DIR, 'openwebtext_packed', '')
     #output_path = os.path.join(storage_dir, 'wikipedia_packed', '')
-    packed_data.save(output_path)
+    #packed_data.save(output_path)
 
 
 
