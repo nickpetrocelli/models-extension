@@ -9,15 +9,18 @@ import tensorflow_hub as hub
 import datasets as hfds
 import argparse
 import tensorflow_text as text
+import tensorflow_hub as hub
 
 _MAX_SEQ_LEN = 128
 _MAX_PREDICTIONS_PER_BATCH = 20
 
 # defining globals to save computation
 
-_tokenizer = tfm_layers.FastWordpieceBertTokenizer(
-         vocab_file=os.path.join('/home/npetroce/data/', "vocab.txt"),
-         lower_case=True)
+# _tokenizer = tfm_layers.FastWordpieceBertTokenizer(
+#          vocab_file=os.path.join('/home/npetroce/data/', "vocab.txt"),
+#          lower_case=True)
+# using tfh tokenizer for vocab compatibility
+_tokenizer = hub.load('https://tfhub.dev/tensorflow/bert_en_uncased_preprocess/3').tokenize
 _special_tokens_dict = _tokenizer.get_special_tokens_dict()
 _trimmer = text.RoundRobinTrimmer(max_seq_length=_MAX_SEQ_LEN)
 
@@ -129,7 +132,7 @@ def main(data_dir):
     dataset_tensors = dataset_tensors.batch(128)
 
 
-    packed_data = dataset_tensors.map(bert_pretrain_preprocess)
+    packed_data = dataset_tensors.map(bert_pretrain_preprocess, num_parallel_calls=tf.data.AUTOTUNE, deterministic=False)
     # packed_data.repeat()
     #print(next(iter(packed_data)))
     # # save it out
