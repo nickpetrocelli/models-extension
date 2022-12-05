@@ -27,7 +27,7 @@ _trimmer = text.RoundRobinTrimmer(max_seq_length=_MAX_SEQ_LEN)
 _random_selector = text.RandomItemSelector(
     max_selections_per_batch=_MAX_PREDICTIONS_PER_BATCH,
     selection_rate=0.15,
-    unselectable_ids=[_special_tokens_dict['start_of_sequence_id'], _special_tokens_dict['end_of_segment_id'], _tokenizer._vocab.index('[UNK]')]
+    unselectable_ids=[_special_tokens_dict['start_of_sequence_id'], _special_tokens_dict['end_of_segment_id'], _special_tokens_dict['mask_id']]
     )
 _mask_values_chooser = text.MaskValuesChooser(
     _special_tokens_dict['vocab_size'], _special_tokens_dict['mask_id'], mask_token_rate=1.0, random_token_rate=0.0
