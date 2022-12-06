@@ -159,9 +159,9 @@ def main(data_dir, model_name, num_runs):
         model=electra.ElectraPretrainerConfig(
             generator_encoder=encoders.EncoderConfig(
                 bert=encoders.BertEncoderConfig(vocab_size=30522,
-                                                hidden_size=256,
-                                                num_attention_heads=4,
-                                                intermediate_size=1024,
+                                                hidden_size=64,
+                                                num_attention_heads=1,
+                                                intermediate_size=256,
                                                 embedding_size=128
                                                 )),
             discriminator_encoder=encoders.EncoderConfig(
