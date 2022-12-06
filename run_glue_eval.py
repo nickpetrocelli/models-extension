@@ -222,7 +222,8 @@ def main(data_dir, model_name, num_runs):
               validation_split = 'validation_matched'
               test_split = 'test_matched'
 
-            num_classes = tfds_info.features['label'].num_classes
+            # stsb doesn't use a class dict for its classes, instead a rank 0-5
+            num_classes = 6 if tfds_name == 'glue/stsb' else tfds_info.features['label'].num_classes
             num_examples = tfds_info.splits.total_num_examples
 
             print(f'Using {tfds_name} from TFDS')
