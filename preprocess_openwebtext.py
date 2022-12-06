@@ -74,6 +74,11 @@ def bert_pretrain_preprocess(inputs):
         )
     )
 
+     # filter out bad indices
+     # probably only works with 1-batches
+    bad_index_mask = tf.where(masked_lm_positions_0 == _MAX_SEQ_LEN, False, True)
+    masked_lm_positions_0 = tf.boolean_mask(masked_lm_positions_0, bad_index_mask)
+
     # Prepare and pad combined segment inputs
     input_word_ids, input_mask = text.pad_model_inputs(
         masked_input_ids, max_seq_length=_MAX_SEQ_LEN)
@@ -87,8 +92,6 @@ def bert_pretrain_preprocess(inputs):
         masked_lm_ids_0, max_seq_length=_MAX_PREDICTIONS_PER_BATCH)
 
     model_inputs = {
-          "masked_lm_positions_0": tf.cast(masked_lm_positions_0, dtype=tf.int32),
-          "masked_lm_ids_0": tf.cast(masked_lm_ids_0, dtype=tf.int32),
           "input_word_ids": tf.cast(input_word_ids, dtype=tf.int32),
           "input_mask": tf.cast(input_mask, dtype=tf.int32),
           "input_type_ids": tf.cast(input_type_ids, dtype=tf.int32),
@@ -159,7 +162,7 @@ def main(data_dir):
     #output_path = os.path.join(data_dir, 'ptb_text_only', '')
     output_path = os.path.join(STORAGE_DIR, 'openwebtext_packed', '')
     #output_path = os.path.join(storage_dir, 'wikipedia_packed', '')
-    #packed_data.save(output_path)
+    packed_data.save(output_path)
 
 
 
