@@ -11,6 +11,7 @@ import argparse
 import tensorflow_text as text
 import tensorflow_hub as hub
 import numpy as np
+import pprint
 
 _MAX_SEQ_LEN = 128
 _MAX_PREDICTIONS_PER_BATCH = 20
@@ -86,6 +87,8 @@ def bert_pretrain_preprocess(inputs):
         masked_lm_ids_0, max_seq_length=_MAX_PREDICTIONS_PER_BATCH)
 
     model_inputs = {
+          "masked_lm_positions_0": tf.cast(masked_lm_positions_0, dtype=tf.int32),
+          "masked_lm_ids_0": tf.cast(masked_lm_ids_0, dtype=tf.int32),
           "input_word_ids": tf.cast(input_word_ids, dtype=tf.int32),
           "input_mask": tf.cast(input_mask, dtype=tf.int32),
           "input_type_ids": tf.cast(input_type_ids, dtype=tf.int32),
@@ -93,17 +96,6 @@ def bert_pretrain_preprocess(inputs):
           "masked_lm_positions": tf.cast(masked_lm_positions, dtype=tf.int32),
           "masked_lm_weights": masked_lm_weights,
     }
-    if np.any(masked_lm_positions.numpy() == 128):
-        print(inputs)
-        print(segments)
-        print(trimmed_segments)
-        print(segments_combined)
-        print(segment_ids)
-        print(masked_lm_positions_0)
-        print(masked_lm_ids_0)
-
-        print(model_inputs)
-        assert False
 
     return model_inputs
 
@@ -158,7 +150,9 @@ def main(data_dir):
 
     packed_data = dataset_tensors.map(bert_pretrain_preprocess, num_parallel_calls=tf.data.AUTOTUNE, deterministic=False)
     for d in iter(packed_data):
-        pass
+        if 128 in d['masked_lm_positions'].numpy():
+            pp = pprint.PrettyPrinter(indent=4)
+            pp.pprint(d)
     #print(next(iter(packed_data)))
     # # save it out
     #output_path = os.path.join(data_dir, 'ptb_text_only', '')
