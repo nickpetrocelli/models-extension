@@ -76,9 +76,9 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
         model=electra.ElectraPretrainerConfig(
             generator_encoder=encoders.EncoderConfig(
                 bert=encoders.BertEncoderConfig(vocab_size=30522,
-                                                hidden_size=256,
-                                                num_attention_heads=4,
-                                                intermediate_size=1024,
+                                                hidden_size=64,
+                                                num_attention_heads=1,
+                                                intermediate_size=256,
                                                 embedding_size=128
                                                 )),
             discriminator_encoder=encoders.EncoderConfig(
@@ -90,14 +90,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
                                                 )),
             num_masked_tokens=20,
             sequence_length=max_seq_length,
-            cls_heads=[
-                bert.ClsHeadConfig(
-                    inner_dim=256, #NRP NOTE: should be 256 for electra small; 12 hidden layers
-                    num_classes=2,
-                    dropout_rate=0.1,
-                    name='next_sentence'
-                )
-            ]),
+            cls_heads=None),
         #dummy?
         train_data=pretrain_dataloader.BertPretrainDataConfig(
             tfds_name=None,
