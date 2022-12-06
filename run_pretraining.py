@@ -54,11 +54,11 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
 
     BATCH_SCALE = 2
 
-    training_steps = training_steps * BATCH_SCALE
+    training_steps = int(training_steps * BATCH_SCALE)
     
     max_seq_length = 128
     # TODO doesn't align with paper, need to fit into memory (currently halved)
-    train_batch_size = 128 / BATCH_SCALE
+    train_batch_size = int(128 / BATCH_SCALE)
     eval_batch_size = 128
     # optimization
     learning_rate = 5e-4
