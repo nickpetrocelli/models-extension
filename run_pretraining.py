@@ -113,7 +113,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     logical_device_names = [logical_device.name for logical_device in tf.config.list_logical_devices()]
 
     if 'GPU' in ''.join(logical_device_names):
-      strategy = tf.distribute.MirroredStrategy(tf.config.list_physical_devices('GPU'))
+      strategy = tf.distribute.MirroredStrategy(tf.config.list_logical_devices('GPU'))
     elif 'TPU' in ''.join(logical_device_names):
       resolver = tf.distribute.cluster_resolver.TPUClusterResolver(tpu='')
       tf.config.experimental_connect_to_cluster(resolver)
