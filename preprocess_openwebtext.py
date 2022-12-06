@@ -34,7 +34,7 @@ _mask_values_chooser = text.MaskValuesChooser(
     )
 
 # modified from https://www.tensorflow.org/text/guide/bert_preprocessing_guide
-# expects a list of batches.
+# expects a tensor containing a batch.
 def bert_pretrain_preprocess(inputs):
 
   # Tokenize segments to shape [num_sentences, (num_words)] each.
@@ -49,10 +49,10 @@ def bert_pretrain_preprocess(inputs):
   print(inputs)
   segments = [_tokenizer(inputs).merge_dims(
       1, -1)]
-  print(segments.shape)
+  print(segments)
   
   trimmed_segments = _trimmer.trim(segments)
-  print(trimmed_segments.shape)
+  print(trimmed_segments)
 
 
 
@@ -135,6 +135,8 @@ def main(data_dir):
     dataset_tensors = dataset_tensors.batch(2)
 
     #print(f'old shape{next(iter(dataset_tensors_old)).shape}')
+    print(_tokenizer.__dict__)
+    print(_special_tokens_dict)
 
     for d in iter(dataset_tensors):
         out = bert_pretrain_preprocess(d)
