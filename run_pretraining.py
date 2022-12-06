@@ -48,8 +48,8 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
      # training hyperparameters: designed for parity with google impl
     # TODO trying to fix oom
     physical_devices = tf.config.list_physical_devices('GPU') 
-    for gpu_instance in physical_devices: 
-        tf.config.experimental.set_memory_growth(gpu_instance, True)
+    # for gpu_instance in physical_devices: 
+    #     tf.config.experimental.set_memory_growth(gpu_instance, True)
     max_seq_length = 128
     train_batch_size = 128
     eval_batch_size = 128
@@ -195,8 +195,8 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
                 task.train_step(next(iterator), model, optimizer, metrics=metrics)
                 metric_results = dict([(metric.name, metric.result().numpy()) for metric in metrics])
                 metric_results['step'] = step_count
+                print(f"Step {s}: {metric_results}")
                 if(step_count % save_checkpoints_steps == 0):
-                    print(f"Step {s}: {metric_results}")
                     checkpoint_manager.save()
                     writer.writerow(metric_results)
                 step_count = step_count + 1
