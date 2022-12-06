@@ -204,7 +204,7 @@ def main(data_dir, model_name, num_runs):
 
     # open csv for writing results
     with open(csvpath, 'w', newline='') as csvfile:
-        fieldnames = ['task', 'metric', 'median', 'mean', '95_conf_int']
+        fieldnames = ['task', 'metric', 'best', 'median', 'mean', '95_conf_int']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         # iterate over each task
@@ -301,6 +301,7 @@ def main(data_dir, model_name, num_runs):
             out_dict['mean'] = np.mean(run_results)
             out_dict['median'] = np.median(run_results)
             out_dict['95_conf_int'] = mean_confidence_interval(run_results)
+            out_dict['best'] = max(run_results)
             
             writer.writerow(out_dict)
                     
