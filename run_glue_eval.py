@@ -143,6 +143,7 @@ TASK_FEATURES = {
 }
 
 def main(data_dir, model_name, num_runs):
+    assert len(tf.config.list_physical_devices('GPU')) > 0
     tf.get_logger().setLevel('ERROR') #TODO maybe don't want to do this?
     
     # always using a GPU
