@@ -90,7 +90,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
                                                 )),
             num_masked_tokens=20,
             sequence_length=max_seq_length,
-            cls_heads=None),
+            cls_heads=[]),
         #dummy?
         train_data=pretrain_dataloader.BertPretrainDataConfig(
             tfds_name=None,
