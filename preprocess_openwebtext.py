@@ -14,7 +14,7 @@ import numpy as np
 import pprint
 
 _MAX_SEQ_LEN = 128
-_MAX_PREDICTIONS_PER_BATCH = 20
+_MAX_PREDICTIONS_PER_BATCH = 19
 
 # defining globals to save computation
 
@@ -153,6 +153,7 @@ def main(data_dir):
         if 128 in d['masked_lm_positions'].numpy():
             pp = pprint.PrettyPrinter(indent=4)
             pp.pprint(d)
+            assert False
     #print(next(iter(packed_data)))
     # # save it out
     #output_path = os.path.join(data_dir, 'ptb_text_only', '')
