@@ -15,6 +15,7 @@
 """Masked language model network."""
 # pylint: disable=g-classes-have-attributes
 import tensorflow as tf
+import numpy as np
 
 
 @tf.keras.utils.register_keras_serializable(package='Text')
@@ -119,6 +120,10 @@ class MaskedLM(tf.keras.layers.Layer):
         positions + tf.cast(flat_offsets, positions.dtype), [-1])
     flat_sequence_tensor = tf.reshape(sequence_tensor,
                                       [batch_size * seq_length, width])
+    # TODO DEBUG remove this later!
+    if np.any(flat_positions.numpy == (128 * 128)):
+      print(positions)
+      print(flat_positions)
     output_tensor = tf.gather(flat_sequence_tensor, flat_positions)
 
     return output_tensor
