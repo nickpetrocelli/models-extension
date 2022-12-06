@@ -46,7 +46,7 @@ def bert_pretrain_preprocess(inputs):
   
   
   # Truncate inputs to a maximum length.
-  #print(tf.shape(inputs))
+  print(tf.shape(inputs))
   segments = [_tokenizer(inputs).merge_dims(
       1, -1)]
   
@@ -91,6 +91,7 @@ def bert_pretrain_preprocess(inputs):
       "masked_lm_positions": tf.cast(masked_lm_positions, dtype=tf.int32),
       "masked_lm_weights": masked_lm_weights,
   }
+  assert False
   return model_inputs
 
 
