@@ -14,7 +14,7 @@ import numpy as np
 import pprint
 
 _MAX_SEQ_LEN = 128
-_MAX_PREDICTIONS_PER_BATCH = 19
+_MAX_PREDICTIONS_PER_BATCH = 20
 
 # defining globals to save computation
 
@@ -77,7 +77,7 @@ def bert_pretrain_preprocess(inputs):
      # filter out bad indices
      # probably only works with 1-batches
     bad_index_mask = tf.where(masked_lm_positions_0 == _MAX_SEQ_LEN, False, True)
-    masked_lm_positions_0 = tf.boolean_mask(masked_lm_positions_0, bad_index_mask)
+    masked_lm_positions_0 = tf.ragged.boolean_mask(masked_lm_positions_0, bad_index_mask)
 
     # Prepare and pad combined segment inputs
     input_word_ids, input_mask = text.pad_model_inputs(
