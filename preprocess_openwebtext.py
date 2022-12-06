@@ -132,12 +132,12 @@ def main(data_dir):
 
     #dataset_tensors = dataset.to_tf_dataset(columns=["text"], batch_size = 128, shuffle=False,)
     dataset_tensors = tf.data.Dataset.from_generator(dataset_conversion_generator, output_signature = tf.TensorSpec(shape=(), dtype=tf.string))
-    #dataset_tensors = dataset_tensors.batch(128)
+    dataset_tensors = dataset_tensors.batch(2)
 
     #print(f'old shape{next(iter(dataset_tensors_old)).shape}')
 
     for d in iter(dataset_tensors):
-        out = bert_pretrain_preprocess([[d]])
+        out = bert_pretrain_preprocess(d)
 
 
 
