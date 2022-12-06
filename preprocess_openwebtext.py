@@ -46,11 +46,13 @@ def bert_pretrain_preprocess(inputs):
   
   
   # Truncate inputs to a maximum length.
-  print(tf.shape(inputs))
+  print(inputs.shape)
   segments = [_tokenizer(inputs).merge_dims(
       1, -1)]
+  print(segments.shape)
   
   trimmed_segments = _trimmer.trim(segments)
+  print(trimmed_segments.shape)
 
 
 
@@ -130,15 +132,17 @@ def main(data_dir):
 
     #dataset_tensors = dataset.to_tf_dataset(columns=["text"], batch_size = 128, shuffle=False,)
     dataset_tensors = tf.data.Dataset.from_generator(dataset_conversion_generator, output_signature = tf.TensorSpec(shape=(), dtype=tf.string))
-    dataset_tensors = dataset_tensors.batch(128)
+    #dataset_tensors = dataset_tensors.batch(128)
 
     #print(f'old shape{next(iter(dataset_tensors_old)).shape}')
-    print(f'new shape{next(iter(dataset_tensors)).shape}')
+
+    for d in iter(dataset_tensors):
+        out = bert_pretrain_preprocess([[d]])
 
 
 
-    packed_data = dataset_tensors.map(bert_pretrain_preprocess, num_parallel_calls=tf.data.AUTOTUNE, deterministic=False)
-    print(next(iter(packed_data)))
+    #packed_data = dataset_tensors.map(bert_pretrain_preprocess, num_parallel_calls=tf.data.AUTOTUNE, deterministic=False)
+    #print(next(iter(packed_data)))
     # # save it out
     #output_path = os.path.join(data_dir, 'ptb_text_only', '')
     output_path = os.path.join(STORAGE_DIR, 'openwebtext_packed', '')
