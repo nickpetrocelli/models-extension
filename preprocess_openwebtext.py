@@ -132,13 +132,13 @@ def main(data_dir):
     dataset_tensors = tf.data.Dataset.from_generator(dataset_conversion_generator, output_signature = tf.TensorSpec(shape=(), dtype=tf.string))
     dataset_tensors = dataset_tensors.batch(128)
 
-    print(f'old shape'{next(iter(dataset_tensors_old)).shape})
-    print(f'new shape'{next(iter(dataset_tensors)).shape})
+    print(f'old shape{next(iter(dataset_tensors_old)).shape}')
+    print(f'new shape{next(iter(dataset_tensors)).shape}')
 
 
 
-    #packed_data = dataset_tensors.map(bert_pretrain_preprocess, num_parallel_calls=tf.data.AUTOTUNE, deterministic=False)
-    #print(next(iter(packed_data)))
+    packed_data = dataset_tensors.map(bert_pretrain_preprocess, num_parallel_calls=tf.data.AUTOTUNE, deterministic=False)
+    print(next(iter(packed_data)))
     # # save it out
     #output_path = os.path.join(data_dir, 'ptb_text_only', '')
     output_path = os.path.join(STORAGE_DIR, 'openwebtext_packed', '')
