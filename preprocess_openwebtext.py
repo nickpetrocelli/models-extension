@@ -46,7 +46,7 @@ def bert_pretrain_preprocess(inputs):
   
   
   # Truncate inputs to a maximum length.
-  print(inputs.shape)
+  print(inputs)
   segments = [_tokenizer(inputs).merge_dims(
       1, -1)]
   print(segments.shape)
