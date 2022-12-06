@@ -46,6 +46,10 @@ from preprocess_openwebtext import bert_pretrain_preprocess
 def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     assert len(tf.config.list_physical_devices('GPU')) > 0
      # training hyperparameters: designed for parity with google impl
+    # TODO trying to fix oom
+    physical_devices = tf.config.list_physical_devices('GPU') 
+    for gpu_instance in physical_devices: 
+        tf.config.experimental.set_memory_growth(gpu_instance, True)
     max_seq_length = 128
     train_batch_size = 128
     eval_batch_size = 128

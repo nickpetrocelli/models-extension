@@ -123,6 +123,8 @@ def dataset_conversion_generator():
 
 
 def main(data_dir):
+    #TODO debug
+    tf.config.run_functions_eagerly(True)
    
     # data dir? TODO
     # TODO hardcoded? not sure I really care
