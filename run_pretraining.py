@@ -12,9 +12,9 @@ import numpy as np
 
 import tensorflow as tf
 # TODO trying to allocate memory better
-physical_devices = tf.config.list_physical_devices('GPU') 
-for gpu_instance in physical_devices: 
-    tf.config.experimental.set_memory_growth(gpu_instance, True)
+# physical_devices = tf.config.list_physical_devices('GPU') 
+# for gpu_instance in physical_devices: 
+#     tf.config.experimental.set_memory_growth(gpu_instance, True)
 
 from official.nlp.configs import bert
 from official.nlp.configs import electra
@@ -51,10 +51,14 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     assert len(tf.config.list_physical_devices('GPU')) > 0
      # training hyperparameters: designed for parity with google impl
     # TODO trying to fix oom
+
+    BATCH_SCALE = 2
+
+    training_steps = training_steps * BATCH_SCALE
     
     max_seq_length = 128
     # TODO doesn't align with paper, need to fit into memory (currently halved)
-    train_batch_size = 64
+    train_batch_size = 128 / BATCH_SCALE
     eval_batch_size = 128
     # optimization
     learning_rate = 5e-4
