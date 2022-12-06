@@ -149,12 +149,14 @@ def main(data_dir):
     print(_tokenizer.__dict__)
     print(_special_tokens_dict)
 
-    for d in iter(dataset_tensors):
-        out = bert_pretrain_preprocess(d)
+    # for d in iter(dataset_tensors):
+    #     out = bert_pretrain_preprocess(d)
 
 
 
-    #packed_data = dataset_tensors.map(bert_pretrain_preprocess, num_parallel_calls=tf.data.AUTOTUNE, deterministic=False)
+    packed_data = dataset_tensors.map(bert_pretrain_preprocess, num_parallel_calls=tf.data.AUTOTUNE, deterministic=False)
+    for d in iter(packed_data):
+        pass
     #print(next(iter(packed_data)))
     # # save it out
     #output_path = os.path.join(data_dir, 'ptb_text_only', '')
