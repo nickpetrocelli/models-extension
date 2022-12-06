@@ -93,7 +93,7 @@ def bert_pretrain_preprocess(inputs):
           "masked_lm_positions": tf.cast(masked_lm_positions, dtype=tf.int32),
           "masked_lm_weights": masked_lm_weights,
     }
-    if 128 in masked_lm_positions:
+    if np.any(masked_lm_positions.numpy == 128):
         print(inputs)
         print(segments)
         print(trimmed_segments)
