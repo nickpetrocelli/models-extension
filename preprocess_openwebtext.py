@@ -10,6 +10,7 @@ import datasets as hfds
 import argparse
 import tensorflow_text as text
 import tensorflow_hub as hub
+import numpy as np
 
 _MAX_SEQ_LEN = 128
 _MAX_PREDICTIONS_PER_BATCH = 20
@@ -37,64 +38,74 @@ _mask_values_chooser = text.MaskValuesChooser(
 # expects a tensor containing a batch.
 def bert_pretrain_preprocess(inputs):
 
-  # Tokenize segments to shape [num_sentences, (num_words)] each.
-  # tokenizer = text.BertTokenizer(
-  #     vocab_table,
-  #     token_out_type=tf.int64)
-  # segments = [tokenizer.tokenize(text).merge_dims(
-  #     1, -1) for text in (text_a, text_b)]
+    # Tokenize segments to shape [num_sentences, (num_words)] each.
+    # tokenizer = text.BertTokenizer(
+    #     vocab_table,
+    #     token_out_type=tf.int64)
+    # segments = [tokenizer.tokenize(text).merge_dims(
+    #     1, -1) for text in (text_a, text_b)]
   
   
-  # Truncate inputs to a maximum length.
-  print(inputs)
-  segments = [_tokenizer(inputs).merge_dims(
-      1, -1)]
-  print(segments)
+    # Truncate inputs to a maximum length.
+    # print(inputs)
+    segments = [_tokenizer(inputs).merge_dims(1, -1)]
+    # print(segments)
   
-  trimmed_segments = _trimmer.trim(segments)
-  print(trimmed_segments)
+    trimmed_segments = _trimmer.trim(segments)
+    # print(trimmed_segments)
 
 
 
-  # Combine segments, get segment ids and add special tokens.
-  segments_combined, segment_ids = text.combine_segments(
-      trimmed_segments,
-      start_of_sequence_id=_special_tokens_dict['start_of_sequence_id'],
-      end_of_segment_id=_special_tokens_dict['end_of_segment_id'])
+    # Combine segments, get segment ids and add special tokens.
+    segments_combined, segment_ids = text.combine_segments(
+        trimmed_segments,
+        start_of_sequence_id=_special_tokens_dict['start_of_sequence_id'],
+        end_of_segment_id=_special_tokens_dict['end_of_segment_id'])
 
   
 
-  # Apply dynamic masking task.
-  masked_input_ids, masked_lm_positions, masked_lm_ids = (
-      text.mask_language_model(
-        segments_combined,
-        _random_selector,
-        _mask_values_chooser,
-      )
-  )
+    # Apply dynamic masking task.
+    masked_input_ids, masked_lm_positions_0, masked_lm_ids_0 = (
+        text.mask_language_model(
+         segments_combined,
+            _random_selector,
+            _mask_values_chooser,
+        )
+    )
 
-  # Prepare and pad combined segment inputs
-  input_word_ids, input_mask = text.pad_model_inputs(
-    masked_input_ids, max_seq_length=_MAX_SEQ_LEN)
-  input_type_ids, _ = text.pad_model_inputs(
-    segment_ids, max_seq_length=_MAX_SEQ_LEN)
+    # Prepare and pad combined segment inputs
+    input_word_ids, input_mask = text.pad_model_inputs(
+        masked_input_ids, max_seq_length=_MAX_SEQ_LEN)
+    input_type_ids, _ = text.pad_model_inputs(
+        segment_ids, max_seq_length=_MAX_SEQ_LEN)
 
-  # Prepare and pad masking task inputs
-  masked_lm_positions, masked_lm_weights = text.pad_model_inputs(
-    masked_lm_positions, max_seq_length=_MAX_PREDICTIONS_PER_BATCH)
-  masked_lm_ids, _ = text.pad_model_inputs(
-    masked_lm_ids, max_seq_length=_MAX_PREDICTIONS_PER_BATCH)
+    # Prepare and pad masking task inputs
+    masked_lm_positions, masked_lm_weights = text.pad_model_inputs(
+        masked_lm_positions_0, max_seq_length=_MAX_PREDICTIONS_PER_BATCH)
+    masked_lm_ids, _ = text.pad_model_inputs(
+        masked_lm_ids_0, max_seq_length=_MAX_PREDICTIONS_PER_BATCH)
 
-  model_inputs = {
-      "input_word_ids": tf.cast(input_word_ids, dtype=tf.int32),
-      "input_mask": tf.cast(input_mask, dtype=tf.int32),
-      "input_type_ids": tf.cast(input_type_ids, dtype=tf.int32),
-      "masked_lm_ids": tf.cast(masked_lm_ids, dtype=tf.int32),
-      "masked_lm_positions": tf.cast(masked_lm_positions, dtype=tf.int32),
-      "masked_lm_weights": masked_lm_weights,
-  }
-  assert False
-  return model_inputs
+    model_inputs = {
+          "input_word_ids": tf.cast(input_word_ids, dtype=tf.int32),
+          "input_mask": tf.cast(input_mask, dtype=tf.int32),
+          "input_type_ids": tf.cast(input_type_ids, dtype=tf.int32),
+          "masked_lm_ids": tf.cast(masked_lm_ids, dtype=tf.int32),
+          "masked_lm_positions": tf.cast(masked_lm_positions, dtype=tf.int32),
+          "masked_lm_weights": masked_lm_weights,
+    }
+    if 128 in masked_lm_positions:
+        print(inputs)
+        print(segments)
+        print(trimmed_segments)
+        print(segments_combined)
+        print(segment_ids)
+        print(masked_lm_positions_0)
+        print(masked_lm_ids_0)
+
+        print(model_inputs)
+        assert False
+
+    return model_inputs
 
 
 def clean_unicode_openwebtext(entry):
