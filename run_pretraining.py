@@ -53,7 +53,8 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     # TODO trying to fix oom
     
     max_seq_length = 128
-    train_batch_size = 128
+    # TODO doesn't align with paper, need to fit into memory (currently halved)
+    train_batch_size = 64
     eval_batch_size = 128
     # optimization
     learning_rate = 5e-4
@@ -147,7 +148,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     dataset = tf.data.Dataset.load(os.path.join(storage_dir, 'openwebtext_packed', ''))
     dataset = dataset.unbatch()
     dataset = dataset.batch(train_batch_size)
-    dataset = dataset.shuffle(10000, reshuffle_each_iteration=True)
+    dataset = dataset.shuffle(1000, reshuffle_each_iteration=True)
     dataset = dataset.repeat()
     
     # dist_dataset = strategy.experimental_distribute_dataset(dataset)
