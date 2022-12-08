@@ -48,8 +48,12 @@ from preprocess_openwebtext import bert_pretrain_preprocess
 
 
 PRETRAINED_MODELS = {
+    #Doesn't fit in 1 gfx card's memory
     'BERT_BASE': 'https://tfhub.dev/tensorflow/bert_en_uncased_L-12_H-768_A-12/4',
-    'WRS_BERT_SMALL_256': 'https://tfhub.dev/tensorflow/small_bert/bert_en_uncased_L-12_H-256_A-4/2'
+    # fits in 1 gfx card's memory
+    'WRS_BERT_SMALL_256_12L': 'https://tfhub.dev/tensorflow/small_bert/bert_en_uncased_L-12_H-256_A-4/2',
+    #TODO
+    'WRS_BERT_MEDIUM_512_12L': 'https://tfhub.dev/tensorflow/small_bert/bert_en_uncased_L-12_H-512_A-8/2'
 }
 
 def main(data_dir, model_name, model_size, use_pretrained, training_steps):
@@ -99,7 +103,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
             num_masked_tokens=20,
             sequence_length=max_seq_length,
             cls_heads=[],
-            pretrained_generator=PRETRAINED_MODELS['WRS_BERT_SMALL_256'] if use_pretrained else None,
+            pretrained_generator=PRETRAINED_MODELS['WRS_BERT_MEDIUM_512_12L'] if use_pretrained else None,
             tie_embeddings=False if use_pretrained else True),
         #dummy?
         train_data=pretrain_dataloader.BertPretrainDataConfig(
