@@ -146,6 +146,11 @@ class ElectraPretrainer(tf.keras.Model):
     masked_lm_positions = inputs['masked_lm_positions']
 
     if self.use_pretrained_gen:
+      lm_inputs = {'input_word_ids': input_word_ids, 
+      'input_mask': input_mask, 
+      'input_type_ids': input_type_ids, 
+      'masked_lm_positions': masked_lm_positions
+      }
       lm_outputs = self.masked_lm(inputs)['mlm_logits']
       # don't bother with sentence outputs
       sentence_outputs = None
