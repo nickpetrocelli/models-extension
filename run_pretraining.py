@@ -78,28 +78,6 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     keep_checkpoint_max = 5 # maximum number of recent checkpoint files to keep;
                                  # change to 0 or None to keep all checkpoints
 
-    # build config for ELECTRA model
-    if use_pretrained:
-        config = electra_task.ElectraPretrainConfig(
-        model=electra.ElectraPretrainerConfig(
-            generator_encoder=encoders.EncoderConfig(
-                bert=encoders.BertEncoderConfig(vocab_size=30522,
-                                                hidden_size=64,
-                                                num_attention_heads=1,
-                                                intermediate_size=256,
-                                                embedding_size=128
-                                                )),
-            discriminator_encoder=encoders.EncoderConfig(
-                 bert=encoders.BertEncoderConfig(vocab_size=30522,
-                                                hidden_size=256,
-                                                num_attention_heads=4,
-                                                intermediate_size=1024,
-                                                embedding_size=128
-                                                )),
-            num_masked_tokens=20,
-            sequence_length=max_seq_length,
-            cls_heads=[],
-            pretrained_generator=PRETRAINED_MODELS['BERT_BASE']),
     if model_size == 'small':
         config = electra_task.ElectraPretrainConfig(
         model=electra.ElectraPretrainerConfig(
@@ -119,7 +97,8 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
                                                 )),
             num_masked_tokens=20,
             sequence_length=max_seq_length,
-            cls_heads=[]),
+            cls_heads=[],
+            pretrained_generator=PRETRAINED_MODELS['BERT_BASE'] if use_pretrained else None),
         #dummy?
         train_data=pretrain_dataloader.BertPretrainDataConfig(
             tfds_name=None,
