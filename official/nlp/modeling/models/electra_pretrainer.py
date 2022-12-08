@@ -151,7 +151,7 @@ class ElectraPretrainer(tf.keras.Model):
       'input_type_ids': input_type_ids, 
       'masked_lm_positions': masked_lm_positions
       }
-      lm_outputs = self.masked_lm(inputs)['mlm_logits']
+      lm_outputs = self.masked_lm(lm_inputs)['mlm_logits']
       # don't bother with sentence outputs
       sentence_outputs = None
     else:
