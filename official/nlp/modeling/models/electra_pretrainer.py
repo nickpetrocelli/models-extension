@@ -68,6 +68,7 @@ class ElectraPretrainer(tf.keras.Model):
                mlm_initializer='glorot_uniform',
                output_type='logits',
                disallow_correct=False,
+               use_pretrained_gen=False,
                **kwargs):
     super(ElectraPretrainer, self).__init__()
     self._config = {
@@ -80,10 +81,12 @@ class ElectraPretrainer(tf.keras.Model):
         'mlm_initializer': mlm_initializer,
         'output_type': output_type,
         'disallow_correct': disallow_correct,
+        'use_pretrained_gen': use_pretrained_gen
     }
     for k, v in kwargs.items():
       self._config[k] = v
 
+    self.use_pretrained_gen = use_pretrained_gen
     self.generator_network = generator_network
     self.discriminator_network = discriminator_network
     self.vocab_size = vocab_size
@@ -93,17 +96,24 @@ class ElectraPretrainer(tf.keras.Model):
     self.mlm_initializer = mlm_initializer
     self.output_type = output_type
     self.disallow_correct = disallow_correct
-    self.masked_lm = layers.MaskedLM(
-        embedding_table=generator_network.get_embedding_table(),
-        activation=mlm_activation,
-        initializer=tf_utils.clone_initializer(mlm_initializer),
-        output=output_type,
-        name='generator_masked_lm')
-    self.classification = layers.ClassificationHead(
-        inner_dim=generator_network.get_config()['hidden_size'],
-        num_classes=num_classes,
-        initializer=tf_utils.clone_initializer(mlm_initializer),
-        name='generator_classification_head')
+    if self.use_pretrained_gen:
+      # just get the masked_lm from the generator
+      self.masked_lm = generator_network.mlm
+      assert not self.masked_lm.trainable
+      # don't need the classification head because we're not doing any training, esp not on NSP
+      self.classification = None
+    else:
+      self.masked_lm = layers.MaskedLM(
+          embedding_table=generator_network.get_embedding_table(),
+          activation=mlm_activation,
+          initializer=tf_utils.clone_initializer(mlm_initializer),
+          output=output_type,
+          name='generator_masked_lm')
+      self.classification = layers.ClassificationHead(
+          inner_dim=generator_network.get_config()['hidden_size'],
+          num_classes=num_classes,
+          initializer=tf_utils.clone_initializer(mlm_initializer),
+          name='generator_classification_head')
     self.discriminator_projection = tf.keras.layers.Dense(
         units=discriminator_network.get_config()['hidden_size'],
         activation=mlm_activation,
@@ -142,10 +152,19 @@ class ElectraPretrainer(tf.keras.Model):
     if isinstance(sequence_output, list):
       sequence_output = sequence_output[-1]
 
-    lm_outputs = self.masked_lm(sequence_output, masked_lm_positions)
-    sentence_outputs = self.classification(sequence_output)
+    
+    if self.use_pretrained_gen:
+      # slightly different signature
+      # TODO maybe different input signature as well?
+      lm_outputs = self.masked_lm(sequence_output, masked_lm_positions)['mlm_logits']
+      # don't bother with sentence outputs
+      sentence_outputs = None
+    else:
+      lm_outputs = self.masked_lm(sequence_output, masked_lm_positions)
+      sentence_outputs = self.classification(sequence_output)
 
     ### Sampling from generator ###
+    # TODO DULL THE LOGITS AND DECREMENT TEMPERATURE BEFORE THIS IS CALLED
     fake_data = self._get_fake_data(inputs, lm_outputs, duplicate=True)
 
     ### Discriminator ###

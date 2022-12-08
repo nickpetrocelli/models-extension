@@ -34,3 +34,4 @@ class ElectraPretrainerConfig(base_config.Config):
   generator_encoder: encoders.EncoderConfig = encoders.EncoderConfig()
   discriminator_encoder: encoders.EncoderConfig = encoders.EncoderConfig()
   cls_heads: List[bert.ClsHeadConfig] = dataclasses.field(default_factory=list)
+  pretrained_generator: str = None

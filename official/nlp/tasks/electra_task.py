@@ -27,6 +27,7 @@ from official.nlp.configs import encoders
 from official.nlp.data import pretrain_dataloader
 from official.nlp.modeling import layers
 from official.nlp.modeling import models
+import tensorflow_hub as hub
 
 
 #NRP NOTE: This seems to be a singleton that saves default parameters. Check electra_task_test.py for usage case.
@@ -63,17 +64,29 @@ class EffectiveMaskRateMetric(tf.keras.metrics.Metric):
 
 def _build_pretrainer(
     config: electra.ElectraPretrainerConfig) -> models.ElectraPretrainer:
-  """Instantiates ElectraPretrainer from the config."""
+  """Instantiates ElectraPretrainer from the config.
+      use_pretrained should be a tensorflow hub string that loads a BERT encoder,
+        should not be used with tie_embeddings.
+        also, don't expect compatibily with next sentence prediction. """
+  pretrained_generator = config.pretrained_generator
   generator_encoder_cfg = config.generator_encoder
   discriminator_encoder_cfg = config.discriminator_encoder
   # Copy discriminator's embeddings to generator for easier model serialization.
   discriminator_network = encoders.build_encoder(discriminator_encoder_cfg)
   if config.tie_embeddings:
+    assert pretrained_generator is None
     embedding_layer = discriminator_network.get_embedding_layer()
     generator_network = encoders.build_encoder(
         generator_encoder_cfg, embedding_layer=embedding_layer)
+    use_pretrained = False
   else:
-    generator_network = encoders.build_encoder(generator_encoder_cfg)
+    if pretrained_generator is not None:
+      generator_network = hub.load(pretrained_generator)
+      generator_network.trainable = False
+      use_pretrained = True
+    else:
+      generator_network = encoders.build_encoder(generator_encoder_cfg)
+      use_pretrained = False
 
   generator_encoder_cfg = generator_encoder_cfg.get()
   return models.ElectraPretrainer(
@@ -90,7 +103,8 @@ def _build_pretrainer(
       classification_heads=[
           layers.ClassificationHead(**cfg.as_dict()) for cfg in config.cls_heads
       ],
-      disallow_correct=config.disallow_correct)
+      disallow_correct=config.disallow_correct,
+      use_pretrained_gen = use_pretrained)
 
 
 @task_factory.register_task_cls(ElectraPretrainConfig)

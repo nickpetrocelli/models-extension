@@ -47,6 +47,10 @@ from preprocess_openwebtext import bert_pretrain_preprocess
 #     orbit.StandardTrainer.__init__(self, train_dataset)
 
 
+PRETRAINED_MODELS = {
+    'BERT_BASE': 'https://tfhub.dev/tensorflow/bert_en_uncased_L-12_H-768_A-12/4'
+}
+
 def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     assert len(tf.config.list_physical_devices('GPU')) > 0
      # training hyperparameters: designed for parity with google impl
@@ -76,8 +80,26 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
 
     # build config for ELECTRA model
     if use_pretrained:
-        raise ValueError("Using pretrained BERT is not yet supported.")
-
+        config = electra_task.ElectraPretrainConfig(
+        model=electra.ElectraPretrainerConfig(
+            generator_encoder=encoders.EncoderConfig(
+                bert=encoders.BertEncoderConfig(vocab_size=30522,
+                                                hidden_size=64,
+                                                num_attention_heads=1,
+                                                intermediate_size=256,
+                                                embedding_size=128
+                                                )),
+            discriminator_encoder=encoders.EncoderConfig(
+                 bert=encoders.BertEncoderConfig(vocab_size=30522,
+                                                hidden_size=256,
+                                                num_attention_heads=4,
+                                                intermediate_size=1024,
+                                                embedding_size=128
+                                                )),
+            num_masked_tokens=20,
+            sequence_length=max_seq_length,
+            cls_heads=[],
+            pretrained_generator=PRETRAINED_MODELS['BERT_BASE']),
     if model_size == 'small':
         config = electra_task.ElectraPretrainConfig(
         model=electra.ElectraPretrainerConfig(
