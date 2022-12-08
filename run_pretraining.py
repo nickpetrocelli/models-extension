@@ -73,7 +73,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     learning_rate = 5e-4
     lr_decay_power = 1.0  # linear weight decay by default
     weight_decay_rate = 0.01
-    num_warmup_steps = 10000 if training_steps >= 100000 else 0 # for debugging
+    num_warmup_steps = 10000 # for debugging
 
     # training settings
     iterations_per_loop = 200
