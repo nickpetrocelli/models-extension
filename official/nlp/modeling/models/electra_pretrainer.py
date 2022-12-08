@@ -21,6 +21,7 @@ import tensorflow as tf
 
 from official.modeling import tf_utils
 from official.nlp.modeling import layers
+import tensorflow_hub as hub
 
 
 @tf.keras.utils.register_keras_serializable(package='Text')
@@ -98,8 +99,7 @@ class ElectraPretrainer(tf.keras.Model):
     self.disallow_correct = disallow_correct
     if self.use_pretrained_gen:
       # just get the masked_lm from the generator
-      self.masked_lm = generator_network.mlm
-      assert not self.masked_lm.trainable
+      self.masked_lm = hub.KerasLayer(generator_network.mlm, trainable=False)
       # don't need the classification head because we're not doing any training, esp not on NSP
       self.classification = None
     else:
