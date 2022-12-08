@@ -145,9 +145,12 @@ class ElectraPretrainer(tf.keras.Model):
     input_type_ids = inputs['input_type_ids']
     masked_lm_positions = inputs['masked_lm_positions']
 
+    # slightly different input signatures
+    gen_input = {'input_mask': input_mask, 'input_type_ids': input_type_ids, 'input_word_ids': input_word_ids} if self.use_pretrained_gen else [input_word_ids, input_mask, input_type_ids]
+
     ### Generator ###
     sequence_output = self.generator_network(
-        [input_word_ids, input_mask, input_type_ids])['sequence_output']
+        gen_input)['sequence_output']
     # The generator encoder network may get outputs from all layers.
     if isinstance(sequence_output, list):
       sequence_output = sequence_output[-1]
