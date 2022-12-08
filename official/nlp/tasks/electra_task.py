@@ -139,6 +139,9 @@ class ElectraPretrainTask(base_task.Task):
           sentence_labels, sentence_outputs, from_logits=True)
       metrics['next_sentence_loss'].update_state(sentence_loss)
       total_loss = mlm_loss + sentence_loss
+    elif self.task_config.model.use_pretrained_gen:
+      # don't propogate loss from the generator because we're not training it
+      total_loss = 0.0
     else:
       total_loss = mlm_loss
 
