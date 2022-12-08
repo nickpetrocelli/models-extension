@@ -99,6 +99,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
             sequence_length=max_seq_length,
             cls_heads=[],
             pretrained_generator=PRETRAINED_MODELS['BERT_BASE'] if use_pretrained else None),
+            tie_embeddings=False if use_pretrained else True,
         #dummy?
         train_data=pretrain_dataloader.BertPretrainDataConfig(
             tfds_name=None,
