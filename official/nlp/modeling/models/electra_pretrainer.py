@@ -166,6 +166,7 @@ class ElectraPretrainer(tf.keras.Model):
 
     ### Sampling from generator ###
     # TODO DULL THE LOGITS AND DECREMENT TEMPERATURE BEFORE THIS IS CALLED
+    # https://www.kasimte.com/2020/02/14/how-does-temperature-affect-softmax-in-machine-learning.html
     fake_data = self._get_fake_data(inputs, lm_outputs, duplicate=True)
 
     ### Discriminator ###
