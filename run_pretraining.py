@@ -73,8 +73,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     learning_rate = 5e-4
     lr_decay_power = 1.0  # linear weight decay by default
     weight_decay_rate = 0.01
-    num_warmup_steps = 10000 # for debugging
-
+    num_warmup_steps = 10000
     # training settings
     iterations_per_loop = 200
     save_checkpoints_steps = 10000
@@ -104,7 +103,9 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
             sequence_length=max_seq_length,
             cls_heads=[],
             pretrained_generator=PRETRAINED_MODELS['WRS_BERT_MEDIUM_512_12L'] if use_pretrained else None,
-            tie_embeddings=False if use_pretrained else True),
+            tie_embeddings=False if use_pretrained else True,
+            mlm_start_temperature=50.0 if use_pretrained else 1.0,
+            mlm_temperature_delta=0.0001),
         #dummy?
         train_data=pretrain_dataloader.BertPretrainDataConfig(
             tfds_name=None,

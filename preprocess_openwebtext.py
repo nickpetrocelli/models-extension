@@ -76,6 +76,11 @@ def bert_pretrain_preprocess(inputs):
 
      # filter out bad indices
      # probably only works with 1-batches
+     # for readers: this is a workaround for a weird bug in tensorflow text
+     # there the mask_language_model occasionally spits out an index = to the length of the sequence
+     # with no associated masked token.
+     # unfortunately I think tensorflow_models ignores the masked_lm_weights, but hopefully it isn't much of an issue.
+     # I couldn't find any documentation of this bug online, so maybe I'm just doing something wrong.
     bad_index_mask = tf.where(masked_lm_positions_0 == _MAX_SEQ_LEN, False, True)
     masked_lm_positions_0 = tf.ragged.boolean_mask(masked_lm_positions_0, bad_index_mask)
 

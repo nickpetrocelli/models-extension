@@ -70,6 +70,8 @@ class ElectraPretrainer(tf.keras.Model):
                output_type='logits',
                disallow_correct=False,
                use_pretrained_gen=False,
+               mlm_start_temperature=1.0,
+               mlm_temperature_delta=0.0,
                **kwargs):
     super(ElectraPretrainer, self).__init__()
     self._config = {
@@ -82,7 +84,9 @@ class ElectraPretrainer(tf.keras.Model):
         'mlm_initializer': mlm_initializer,
         'output_type': output_type,
         'disallow_correct': disallow_correct,
-        'use_pretrained_gen': use_pretrained_gen
+        'use_pretrained_gen': use_pretrained_gen,
+        'mlm_start_temperature': mlm_start_temperature,
+        'mlm_temperature_delta': mlm_temperature_delta,
     }
     for k, v in kwargs.items():
       self._config[k] = v
@@ -97,6 +101,8 @@ class ElectraPretrainer(tf.keras.Model):
     self.mlm_initializer = mlm_initializer
     self.output_type = output_type
     self.disallow_correct = disallow_correct
+    self.mlm_temperature = mlm_start_temperature
+    self.mlm_temperature_delta = mlm_temperature_delta
     if self.use_pretrained_gen:
       # just get the masked_lm from the generator
       self.masked_lm = hub.KerasLayer(generator_network.mlm, trainable=False)
@@ -165,9 +171,13 @@ class ElectraPretrainer(tf.keras.Model):
       sentence_outputs = self.classification(sequence_output)
 
     ### Sampling from generator ###
-    # TODO DULL THE LOGITS AND DECREMENT TEMPERATURE BEFORE THIS IS CALLED
     # https://www.kasimte.com/2020/02/14/how-does-temperature-affect-softmax-in-machine-learning.html
+    if self.mlm_temperature > 1.0:
+      lm_outputs = lm_outputs / self.mlm_temperature
+      self.mlm_temperature = self.mlm_temperature - self.mlm_temperature_delta
     fake_data = self._get_fake_data(inputs, lm_outputs, duplicate=True)
+    
+
 
     ### Discriminator ###
     disc_input = fake_data['inputs']
