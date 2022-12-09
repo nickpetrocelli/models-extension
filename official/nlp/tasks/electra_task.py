@@ -104,7 +104,9 @@ def _build_pretrainer(
           layers.ClassificationHead(**cfg.as_dict()) for cfg in config.cls_heads
       ],
       disallow_correct=config.disallow_correct,
-      use_pretrained_gen = use_pretrained)
+      use_pretrained_gen=use_pretrained,
+      mlm_start_temperature=config.mlm_start_temperature,
+      mlm_temperature_delta=config.mlm_temperature_delta)
 
 
 @task_factory.register_task_cls(ElectraPretrainConfig)

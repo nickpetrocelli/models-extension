@@ -104,8 +104,8 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
             cls_heads=[],
             pretrained_generator=PRETRAINED_MODELS['WRS_BERT_MEDIUM_512_12L'] if use_pretrained else None,
             tie_embeddings=False if use_pretrained else True,
-            mlm_start_temperature=500.0 if use_pretrained else 1.0,
-            mlm_temperature_delta=0.001),
+            mlm_start_temperature=50.0 if use_pretrained else 1.0,
+            mlm_temperature_delta=0.0001),
         #dummy?
         train_data=pretrain_dataloader.BertPretrainDataConfig(
             tfds_name=None,
