@@ -171,12 +171,6 @@ class ElectraPretrainer(tf.keras.Model):
       sentence_outputs = self.classification(sequence_output)
 
     ### Sampling from generator ###
-    # https://www.kasimte.com/2020/02/14/how-does-temperature-affect-softmax-in-machine-learning.html
-    if self.mlm_temperature > 1.0:
-      print(f"dividing by tempurature of {self.mlm_temperature}, pre-divide mean: {tf.math.reduce_mean(lm_outputs)}")
-      lm_outputs = lm_outputs / self.mlm_temperature
-      print(f"post-divide mean: {tf.math.reduce_mean(lm_outputs)}")
-      self.mlm_temperature = self.mlm_temperature - self.mlm_temperature_delta
     fake_data = self._get_fake_data(inputs, lm_outputs, duplicate=True)
     
 
@@ -226,11 +220,16 @@ class ElectraPretrainer(tf.keras.Model):
       disallow = None
 
     sampled_tokens = tf.stop_gradient(
-        sample_from_softmax(mlm_logits, disallow=disallow))
+        sample_from_softmax(mlm_logits, disallow=disallow, temperature=self.mlm_temperature))
     sampled_tokids = tf.argmax(sampled_tokens, -1, output_type=tf.int32)
     updated_input_ids, masked = scatter_update(inputs['input_word_ids'],
                                                sampled_tokids,
                                                inputs['masked_lm_positions'])
+
+   
+    if self.mlm_temperature > 1.0:
+      self.mlm_temperature = self.mlm_temperature - self.mlm_temperature_delta
+
     labels = masked * (1 - tf.cast(
         tf.equal(updated_input_ids, inputs['input_word_ids']), tf.int32))
 
@@ -321,7 +320,7 @@ def scatter_update(sequence, updates, positions):
   return updated_sequence, updates_mask
 
 
-def sample_from_softmax(logits, disallow=None):
+def sample_from_softmax(logits, disallow=None, temperature=1.0):
   """Implement softmax sampling using gumbel softmax trick.
 
   Args:
@@ -341,10 +340,12 @@ def sample_from_softmax(logits, disallow=None):
       tf_utils.get_shape_list(logits), minval=0, maxval=1)
   gumbel_noise = -tf.math.log(-tf.math.log(uniform_noise + 1e-9) + 1e-9)
 
+  # https://www.kasimte.com/2020/02/14/how-does-temperature-affect-softmax-in-machine-learning.html
+  # https://stats.stackexchange.com/questions/366948/why-do-we-need-the-temperature-in-gumbel-softmax-trick
   # Here we essentially follow the original paper and use temperature 1.0 for
   # generator output logits.
   sampled_tokens = tf.one_hot(
-      tf.argmax(tf.nn.softmax(logits + gumbel_noise), -1, output_type=tf.int32),
+      tf.argmax(tf.nn.softmax((logits + gumbel_noise) / temperature), -1, output_type=tf.int32),
       logits.shape[-1])
   return sampled_tokens
 
