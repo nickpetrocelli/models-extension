@@ -104,7 +104,7 @@ class ElectraPretrainer(tf.keras.Model):
     self.disallow_correct = disallow_correct
     self.mlm_temperature = mlm_start_temperature
     self.mlm_temperature_decay_coeff = mlm_temperature_decay_coeff
-    self.step_count = 0
+    self.step_count = 1
     if self.use_pretrained_gen:
       # just get the masked_lm from the generator
       self.masked_lm = hub.KerasLayer(generator_network.mlm, trainable=False)
