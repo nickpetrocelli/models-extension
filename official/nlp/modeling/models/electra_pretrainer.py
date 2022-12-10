@@ -229,6 +229,8 @@ class ElectraPretrainer(tf.keras.Model):
     updated_input_ids, masked = scatter_update(inputs['input_word_ids'],
                                                sampled_tokids,
                                                inputs['masked_lm_positions'])
+    print("sampled tokens", sampled_tokens)
+    print("sampled tokids", sampled_tokids)
 
    
     if self.mlm_temperature > 1.0:
