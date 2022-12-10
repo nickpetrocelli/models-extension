@@ -52,7 +52,7 @@ PRETRAINED_MODELS = {
     'BERT_BASE': 'https://tfhub.dev/tensorflow/bert_en_uncased_L-12_H-768_A-12/4',
     # fits in 1 gfx card's memory
     'WRS_BERT_SMALL_256_12L': 'https://tfhub.dev/tensorflow/small_bert/bert_en_uncased_L-12_H-256_A-4/2',
-    #TODO
+    # fits
     'WRS_BERT_MEDIUM_512_12L': 'https://tfhub.dev/tensorflow/small_bert/bert_en_uncased_L-12_H-512_A-8/2'
 }
 
@@ -67,7 +67,7 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     
     max_seq_length = 128
     # TODO doesn't align with paper, need to fit into memory (currently halved)
-    train_batch_size = int(128 / BATCH_SCALE)
+    train_batch_size = 1 # TODO int(128 / BATCH_SCALE)
     eval_batch_size = 128
     # optimization
     learning_rate = 5e-4

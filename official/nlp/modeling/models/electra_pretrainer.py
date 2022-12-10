@@ -170,11 +170,12 @@ class ElectraPretrainer(tf.keras.Model):
       lm_outputs = self.masked_lm(sequence_output, masked_lm_positions)
       sentence_outputs = self.classification(sequence_output)
 
-    print(lm_outputs)
+    #print(lm_outputs)
     ### Sampling from generator ### 
     # for metrics
     lm_outputs_div = lm_outputs / self.mlm_temperature
     fake_data = self._get_fake_data(inputs, lm_outputs, duplicate=True)
+    #print(lm_outputs_div)
     
 
 
@@ -347,6 +348,8 @@ def sample_from_softmax(logits, disallow=None, temperature=1.0):
   # https://stats.stackexchange.com/questions/366948/why-do-we-need-the-temperature-in-gumbel-softmax-trick
   # Here we essentially follow the original paper and use temperature 1.0 for
   # generator output logits.
+  print("before div", tf.nn.softmax((logits + gumbel_noise) / 1))
+  print("after div", tf.nn.softmax((logits + gumbel_noise) / temperature))
   sampled_tokens = tf.one_hot(
       tf.argmax(tf.nn.softmax((logits + gumbel_noise) / temperature), -1, output_type=tf.int32),
       logits.shape[-1])
