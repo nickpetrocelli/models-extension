@@ -172,7 +172,7 @@ class ElectraPretrainer(tf.keras.Model):
 
     #print(lm_outputs)
     ### Sampling from generator ### 
-    # for metrics
+    # for metrics/loss
     lm_outputs_div = lm_outputs / self.mlm_temperature
     fake_data = self._get_fake_data(inputs, lm_outputs, duplicate=True)
     #print(lm_outputs_div)
@@ -229,8 +229,7 @@ class ElectraPretrainer(tf.keras.Model):
     updated_input_ids, masked = scatter_update(inputs['input_word_ids'],
                                                sampled_tokids,
                                                inputs['masked_lm_positions'])
-    print("sampled tokens", sampled_tokens)
-    print("sampled tokids", sampled_tokids)
+    #print("sampled tokids", sampled_tokids)
 
    
     if self.mlm_temperature > 1.0:
@@ -350,7 +349,7 @@ def sample_from_softmax(logits, disallow=None, temperature=1.0):
   # https://stats.stackexchange.com/questions/366948/why-do-we-need-the-temperature-in-gumbel-softmax-trick
   # Here we essentially follow the original paper and use temperature 1.0 for
   # generator output logits.
-  print("before div", tf.nn.softmax((logits + gumbel_noise) / 1), tf.argmax( tf.nn.softmax((logits + gumbel_noise) / 1), -1, output_type=tf.int32))
+  #print("before div", tf.nn.softmax((logits + gumbel_noise) / 1), tf.argmax( tf.nn.softmax((logits + gumbel_noise) / 1), -1, output_type=tf.int32))
   print("after div", tf.nn.softmax((logits + gumbel_noise) / temperature), tf.argmax(tf.nn.softmax((logits + gumbel_noise) / temperature), -1, output_type=tf.int32))
   sampled_tokens = tf.one_hot(
       tf.argmax(tf.nn.softmax((logits + gumbel_noise) / temperature), -1, output_type=tf.int32),
