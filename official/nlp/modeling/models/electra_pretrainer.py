@@ -173,7 +173,7 @@ class ElectraPretrainer(tf.keras.Model):
     ### Sampling from generator ###
     # https://www.kasimte.com/2020/02/14/how-does-temperature-affect-softmax-in-machine-learning.html
     if self.mlm_temperature > 1.0:
-      #print(f"dividing by tempurature of {self.mlm_temperature}")
+      print(f"dividing by tempurature of {self.mlm_temperature}")
       lm_outputs = lm_outputs / self.mlm_temperature
       self.mlm_temperature = self.mlm_temperature - self.mlm_temperature_delta
     fake_data = self._get_fake_data(inputs, lm_outputs, duplicate=True)
