@@ -106,7 +106,7 @@ def _build_pretrainer(
       disallow_correct=config.disallow_correct,
       use_pretrained_gen=use_pretrained,
       mlm_start_temperature=config.mlm_start_temperature,
-      mlm_temperature_delta=config.mlm_temperature_delta)
+      mlm_temperature_decay_coeff=config.mlm_temperature_decay_coeff)
 
 
 @task_factory.register_task_cls(ElectraPretrainConfig)
