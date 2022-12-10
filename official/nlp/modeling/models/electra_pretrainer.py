@@ -22,6 +22,7 @@ import tensorflow as tf
 from official.modeling import tf_utils
 from official.nlp.modeling import layers
 import tensorflow_hub as hub
+import math
 
 
 @tf.keras.utils.register_keras_serializable(package='Text')
@@ -71,7 +72,7 @@ class ElectraPretrainer(tf.keras.Model):
                disallow_correct=False,
                use_pretrained_gen=False,
                mlm_start_temperature=1.0,
-               mlm_temperature_delta=0.0,
+               mlm_temperature_decay_coeff=0.0,
                **kwargs):
     super(ElectraPretrainer, self).__init__()
     self._config = {
@@ -86,7 +87,7 @@ class ElectraPretrainer(tf.keras.Model):
         'disallow_correct': disallow_correct,
         'use_pretrained_gen': use_pretrained_gen,
         'mlm_start_temperature': mlm_start_temperature,
-        'mlm_temperature_delta': mlm_temperature_delta,
+        'mlm_temperature_decay_coeff': mlm_temperature_decay_coeff,
     }
     for k, v in kwargs.items():
       self._config[k] = v
@@ -102,7 +103,8 @@ class ElectraPretrainer(tf.keras.Model):
     self.output_type = output_type
     self.disallow_correct = disallow_correct
     self.mlm_temperature = mlm_start_temperature
-    self.mlm_temperature_delta = mlm_temperature_delta
+    self.mlm_temperature_decay_coeff = mlm_temperature_decay_coeff
+    self.step_count = 0
     if self.use_pretrained_gen:
       # just get the masked_lm from the generator
       self.masked_lm = hub.KerasLayer(generator_network.mlm, trainable=False)
@@ -173,8 +175,12 @@ class ElectraPretrainer(tf.keras.Model):
     #print(lm_outputs)
     ### Sampling from generator ### 
     # for metrics/loss
-    lm_outputs_div = lm_outputs / self.mlm_temperature
-    fake_data = self._get_fake_data(inputs, lm_outputs, duplicate=True)
+    current_temperature = self.mlm_temperature_decay_coeff * math.log(self.step_count) + self.mlm_temperature
+    if current_temperature < 1.0:
+      current_temperature = 1.0
+    lm_outputs_div = lm_outputs / current_temperature
+    self.step_count = self.step_count + 1
+    fake_data = self._get_fake_data(inputs, lm_outputs, duplicate=True, temperature=current_temperature)
     #print(lm_outputs_div)
     
 
@@ -204,7 +210,7 @@ class ElectraPretrainer(tf.keras.Model):
 
     return outputs
 
-  def _get_fake_data(self, inputs, mlm_logits, duplicate=True):
+  def _get_fake_data(self, inputs, mlm_logits, duplicate=True, temperature=1.0):
     """Generate corrupted data for discriminator.
 
     Args:
@@ -224,7 +230,7 @@ class ElectraPretrainer(tf.keras.Model):
       disallow = None
 
     sampled_tokens = tf.stop_gradient(
-        sample_from_softmax(mlm_logits, disallow=disallow, temperature=self.mlm_temperature))
+        sample_from_softmax(mlm_logits, disallow=disallow, temperature=temperature))
     sampled_tokids = tf.argmax(sampled_tokens, -1, output_type=tf.int32)
     updated_input_ids, masked = scatter_update(inputs['input_word_ids'],
                                                sampled_tokids,
@@ -232,8 +238,7 @@ class ElectraPretrainer(tf.keras.Model):
     #print("sampled tokids", sampled_tokids)
 
    
-    if self.mlm_temperature > 1.0:
-      self.mlm_temperature = self.mlm_temperature - self.mlm_temperature_delta
+   
 
     labels = masked * (1 - tf.cast(
         tf.equal(updated_input_ids, inputs['input_word_ids']), tf.int32))

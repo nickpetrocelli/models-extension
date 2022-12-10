@@ -36,4 +36,4 @@ class ElectraPretrainerConfig(base_config.Config):
   cls_heads: List[bert.ClsHeadConfig] = dataclasses.field(default_factory=list)
   pretrained_generator: str = None
   mlm_start_temperature: float = 1.0
-  mlm_temperature_delta: float = 0.0
+  mlm_temperature_decay_coeff: float = 0.0
