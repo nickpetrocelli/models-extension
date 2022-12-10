@@ -350,7 +350,7 @@ def sample_from_softmax(logits, disallow=None, temperature=1.0):
   # Here we essentially follow the original paper and use temperature 1.0 for
   # generator output logits.
   #print("before div", tf.nn.softmax((logits + gumbel_noise) / 1), tf.argmax( tf.nn.softmax((logits + gumbel_noise) / 1), -1, output_type=tf.int32))
-  print("after div", tf.nn.softmax((logits + gumbel_noise) / temperature), tf.argmax(tf.nn.softmax((logits + gumbel_noise) / temperature), -1, output_type=tf.int32))
+  #print("after div", tf.nn.softmax((logits + gumbel_noise) / temperature), tf.argmax(tf.nn.softmax((logits + gumbel_noise) / temperature), -1, output_type=tf.int32))
   sampled_tokens = tf.one_hot(
       tf.argmax(tf.nn.softmax((logits + gumbel_noise) / temperature), -1, output_type=tf.int32),
       logits.shape[-1])
