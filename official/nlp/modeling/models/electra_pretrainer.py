@@ -170,7 +170,10 @@ class ElectraPretrainer(tf.keras.Model):
       lm_outputs = self.masked_lm(sequence_output, masked_lm_positions)
       sentence_outputs = self.classification(sequence_output)
 
-    ### Sampling from generator ###
+    print(lm_outputs)
+    ### Sampling from generator ### 
+    # for metrics
+    lm_outputs_div = lm_outputs / self.mlm_temperature
     fake_data = self._get_fake_data(inputs, lm_outputs, duplicate=True)
     
 
@@ -192,7 +195,7 @@ class ElectraPretrainer(tf.keras.Model):
     disc_logits = tf.squeeze(disc_logits, axis=-1)
 
     outputs = {
-        'lm_outputs': lm_outputs,
+        'lm_outputs': lm_outputs_div,
         'sentence_outputs': sentence_outputs,
         'disc_logits': disc_logits,
         'disc_label': disc_label,
