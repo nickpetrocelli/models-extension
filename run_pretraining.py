@@ -121,8 +121,8 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps, dulli
             tie_embeddings=False if use_pretrained else True,
             mlm_start_temperature=2.0 * pow(10, 1) if using_temp else 1.0,
             mlm_temperature_decay_coeff=-1.4 if using_temp else 0.0,
-            mlm_start_noise = 10.0 if using_noise else 0.0,
-            mlm_noise_delta = 0.00001 if using_noise else 0.0),
+            mlm_start_noise = 60.0 if using_noise else 0.0,
+            mlm_noise_delta = 0.00006 if using_noise else 0.0),
         #dummy?
         train_data=pretrain_dataloader.BertPretrainDataConfig(
             tfds_name=None,
