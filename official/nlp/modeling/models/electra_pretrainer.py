@@ -73,6 +73,8 @@ class ElectraPretrainer(tf.keras.Model):
                use_pretrained_gen=False,
                mlm_start_temperature=1.0,
                mlm_temperature_decay_coeff=0.0,
+               mlm_start_noise=0.0,
+               mlm_noise_delta=0.0,
                **kwargs):
     super(ElectraPretrainer, self).__init__()
     self._config = {
@@ -88,6 +90,8 @@ class ElectraPretrainer(tf.keras.Model):
         'use_pretrained_gen': use_pretrained_gen,
         'mlm_start_temperature': mlm_start_temperature,
         'mlm_temperature_decay_coeff': mlm_temperature_decay_coeff,
+        'mlm_start_noise':mlm_start_noise,
+        'mlm_noise_delta':mlm_noise_delta,
     }
     for k, v in kwargs.items():
       self._config[k] = v
@@ -105,6 +109,8 @@ class ElectraPretrainer(tf.keras.Model):
     self.mlm_temperature = mlm_start_temperature
     self.mlm_temperature_decay_coeff = mlm_temperature_decay_coeff
     self.step_count = 1
+    self.mlm_noise = mlm_start_noise
+    self.mlm_noise_delta = mlm_noise_delta
     if self.use_pretrained_gen:
       # just get the masked_lm from the generator
       self.masked_lm = hub.KerasLayer(generator_network.mlm, trainable=False)
@@ -178,6 +184,13 @@ class ElectraPretrainer(tf.keras.Model):
     current_temperature = self.mlm_temperature_decay_coeff * math.log(self.step_count) + self.mlm_temperature
     if current_temperature < 1.0:
       current_temperature = 1.0
+    if self.mlm_noise > 0.0:
+      #noising the logits to try to make distribution worse
+      uniform_noise = tf.random.uniform(
+        tf_utils.get_shape_list(lm_outputs), minval=-self.mlm_noise, maxval=self.mlm_noise)
+      lm_outputs = lm_outputs + uniform_noise
+      self.mlm_noise = self.mlm_noise - self.mlm_noise_delta
+
     lm_outputs_div = lm_outputs / current_temperature
     self.step_count = self.step_count + 1
     fake_data = self._get_fake_data(inputs, lm_outputs, duplicate=True, temperature=current_temperature)

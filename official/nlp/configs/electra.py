@@ -37,3 +37,5 @@ class ElectraPretrainerConfig(base_config.Config):
   pretrained_generator: str = None
   mlm_start_temperature: float = 1.0
   mlm_temperature_decay_coeff: float = 0.0
+  mlm_start_noise: float = 0.0
+  mlm_noise_delta: float = 0.0

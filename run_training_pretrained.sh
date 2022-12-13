@@ -14,4 +14,4 @@
 export PATH=/home/npetroce/Desktop/classwork/CS2952C/models-extension/models_env/bin:$PATH
 export DATA_DIR=/home/npetroce/data/
 source models_env/bin/activate
-python3 run_pretraining.py --data-dir $DATA_DIR --model-name $1 --training-steps $2 --use-pretrained
+python3 run_pretraining.py --data-dir $DATA_DIR --model-name $1 --training-steps $2 --use-pretrained --dulling-strategy $3

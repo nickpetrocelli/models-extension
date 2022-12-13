@@ -56,7 +56,7 @@ PRETRAINED_MODELS = {
     'WRS_BERT_MEDIUM_512_12L': 'https://tfhub.dev/tensorflow/small_bert/bert_en_uncased_L-12_H-512_A-8/2'
 }
 
-def main(data_dir, model_name, model_size, use_pretrained, training_steps):
+def main(data_dir, model_name, model_size, use_pretrained, training_steps, dulling_strategy):
     assert len(tf.config.list_physical_devices('GPU')) > 0
      # training hyperparameters: designed for parity with google impl
     # TODO trying to fix oom
@@ -82,6 +82,21 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
     keep_checkpoint_max = 5 # maximum number of recent checkpoint files to keep;
                                  # change to 0 or None to keep all checkpoints
 
+    if use_pretrained:
+        if dulling_strategy == 'temp':
+            using_temp = True
+            using_noise = False
+        elif dulling_strategy == 'noise':
+            using_temp = False
+            using_noise = True
+        else:
+            using_temp = False
+            using_noise = False
+            raise ValueError(f"Unrecognized dulling strategy {dulling_strategy}")
+    else:
+        using_temp = False
+        using_noise = False
+
     if model_size == 'small':
         config = electra_task.ElectraPretrainConfig(
         model=electra.ElectraPretrainerConfig(
@@ -104,8 +119,10 @@ def main(data_dir, model_name, model_size, use_pretrained, training_steps):
             cls_heads=[],
             pretrained_generator=PRETRAINED_MODELS['WRS_BERT_MEDIUM_512_12L'] if use_pretrained else None,
             tie_embeddings=False if use_pretrained else True,
-            mlm_start_temperature=2.0 * pow(10, 1) if use_pretrained else 1.0,
-            mlm_temperature_decay_coeff=-1.4 if use_pretrained else 0.0),
+            mlm_start_temperature=2.0 * pow(10, 1) if using_temp else 1.0,
+            mlm_temperature_decay_coeff=-1.4 if using_temp else 0.0,
+            mlm_start_noise = 10.0 if using_noise else 0.0,
+            mlm_noise_delta = 0.00001 if using_noise else 0.0),
         #dummy?
         train_data=pretrain_dataloader.BertPretrainDataConfig(
             tfds_name=None,
@@ -223,8 +240,10 @@ if __name__ == '__main__':
                             help="size of the model, either 'small', 'base', or 'large'")
     parser.add_argument("--use-pretrained", action="store_true",
                             help="use a pretrained BERT and attempt distribution dulling")
+    parser.add_argument("--dulling-strategy", action="store", type=str, default="noise",
+                            help="which dulling strategy to use, should be either 'noise' or 'temp'")
     parser.add_argument("--training-steps", action="store", type=int, default=1000000,
                             help="number of training steps to run. 1000000 is default.")
     args = parser.parse_args()
     
-    main(args.data_dir, args.model_name, args.model_size, args.use_pretrained, args.training_steps)
+    main(args.data_dir, args.model_name, args.model_size, args.use_pretrained, args.training_steps, args.dulling_strategy)
