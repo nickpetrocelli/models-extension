@@ -112,8 +112,8 @@ def get_configuration(glue_task):
 
     if glue_task == 'glue/cola':
         #https://github.com/tensorflow/addons/issues/2781
-        #metrics = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=2)
-        metrics = scikit_mc
+        metrics = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=2)
+        #metrics = scikit_mc
     elif glue_task == 'glue/stsb':
         metrics = spearman_rankcor
     else:
@@ -124,7 +124,7 @@ def get_configuration(glue_task):
 
 
 # build a simple linear classifier over encoder
-def build_classifier_model(num_classes, encoder_model):
+def build_classifier_model_tfm(num_classes, encoder_model):
     
 
     classifier_model = bert_classifier.BertClassifier(
@@ -136,6 +136,26 @@ def build_classifier_model(num_classes, encoder_model):
         )
 
     return classifier_model
+
+
+def build_classifier_model(num_classes, encoder_model):
+
+  class Classifier(tf.keras.Model):
+    def __init__(self, num_classes):
+      super(Classifier, self).__init__(name="prediction")
+      self.encoder = hub.KerasLayer(encoder_model, trainable=True)
+      self.dropout = tf.keras.layers.Dropout(0.1)
+      self.dense = tf.keras.layers.Dense(num_classes)
+
+    def call(self, preprocessed_text):
+      encoder_outputs = self.encoder(preprocessed_text)
+      pooled_output = encoder_outputs["pooled_output"]
+      x = self.dropout(pooled_output)
+      x = self.dense(x)
+      return x
+
+  model = Classifier(num_classes)
+  return model
 
 
 # dict to maintain relation between text features and task def
