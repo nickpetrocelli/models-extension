@@ -28,6 +28,7 @@ import tensorflow_datasets as tfds
 import tensorflow_text as text  # A dependency of the preprocessing model
 import scipy.stats
 import numpy as np
+from sklearn.metrics import matthews_corrcoef
 
 
 # from https://www.tensorflow.org/text/tutorials/bert_glue
@@ -89,8 +90,13 @@ def load_dataset_from_tfds(in_memory_ds, info, split, batch_size,
 
 # https://stackoverflow.com/questions/53404301/how-to-compute-spearman-correlation-in-tensorflow
 def spearman_rankcor(y_true, y_pred):
-     return ( tf.py_function(scipy.stats.spearmanr, [tf.cast(y_pred, tf.float32), 
-                       tf.cast(y_true, tf.float32)], Tout = tf.float32) )
+     #return ( tf.py_function(scipy.stats.spearmanr, [tf.cast(y_pred, tf.float32), 
+                       #tf.cast(y_true, tf.float32)], Tout = tf.float32) )
+    return scipy.stats.spearmanr(y_true, y_pred)[0]
+
+def scikit_mc(y_true, y_pred):
+    #return (tf.py_function(matthews_corrcoef, [tf.cast(y_true, tf.float32)  tf.cast(y_pred, tf.float32)], Tout = tf.float32))
+    return matthews_corrcoef(y_true, y_pred)
 
 def mean_confidence_interval(data, confidence=0.95):
     a = 1.0 * np.array(data)
@@ -104,7 +110,9 @@ def get_configuration(glue_task):
     loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 
     if glue_task == 'glue/cola':
-        metrics = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=2)
+        #https://github.com/tensorflow/addons/issues/2781
+        #metrics = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=2)
+        metrics = scikit_mc
     elif glue_task == 'glue/stsb':
         metrics = spearman_rankcor
     else:
