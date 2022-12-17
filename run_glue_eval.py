@@ -97,7 +97,7 @@ def scikit_mc(y_true, y_pred):
     print(y_true)
     print(y_pred)
     pred = tf.one_hot(tf.argmax(y_pred, axis = 1), depth = 2)
-    return (tf.py_function(matthews_corrcoef, [tf.cast(y_true, tf.int32),  tf.cast(pred, tf.int32)], Tout = tf.float32))
+    return (tf.py_function(matthews_corrcoef, [tf.cast(y_true, tf.int32),  tf.cast(y_pred, tf.int32)], Tout = tf.float32))
 
 def mean_confidence_interval(data, confidence=0.95):
     a = 1.0 * np.array(data)
@@ -112,8 +112,8 @@ def get_configuration(glue_task):
 
     if glue_task == 'glue/cola':
         #https://github.com/tensorflow/addons/issues/2781
-        metrics = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=2)
-        #metrics = scikit_mc
+        #metrics = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=2)
+        metrics = scikit_mc
     elif glue_task == 'glue/stsb':
         metrics = spearman_rankcor
     else:
