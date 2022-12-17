@@ -99,6 +99,18 @@ def scikit_mc(y_true, y_pred):
     pred = tf.math.round(y_pred)
     return (tf.py_function(matthews_corrcoef, [tf.cast(y_true, tf.int32),  tf.cast(pred, tf.int32)], Tout = tf.float32))
 
+# https://stackoverflow.com/questions/56865344/how-do-i-calculate-the-matthews-correlation-coefficient-in-tensorflow
+def mcc_metric(y_true, y_pred):
+    threshold = 0.5
+    predicted = tf.cast(tf.greater(y_pred, threshold), tf.float32)
+    true_pos = tf.math.count_nonzero(predicted * y_true)
+    true_neg = tf.math.count_nonzero((predicted - 1) * (y_true - 1))
+    false_pos = tf.math.count_nonzero(predicted * (y_true - 1))
+    false_neg = tf.math.count_nonzero((predicted - 1) * y_true)
+    x = tf.cast((true_pos + false_pos) * (true_pos + false_neg) 
+        * (true_neg + false_pos) * (true_neg + false_neg), tf.float32)
+    return tf.cast((true_pos * true_neg) - (false_pos * false_neg), tf.float32) / tf.sqrt(x)
+
 def mean_confidence_interval(data, confidence=0.95):
     a = 1.0 * np.array(data)
     n = len(a)
@@ -113,7 +125,8 @@ def get_configuration(glue_task):
     if glue_task == 'glue/cola':
         #https://github.com/tensorflow/addons/issues/2781
         #metrics = tfa.metrics.MatthewsCorrelationCoefficient(num_classes=2)
-        metrics = scikit_mc
+        #metrics = scikit_mc
+        metrics = mcc_metric
     elif glue_task == 'glue/stsb':
         metrics = spearman_rankcor
     else:
