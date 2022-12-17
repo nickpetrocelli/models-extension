@@ -96,7 +96,7 @@ def spearman_rankcor(y_true, y_pred):
 def scikit_mc(y_true, y_pred):
     print(y_true)
     print(y_pred)
-    pred = np.round(y_pred)
+    pred = tf.math.round(y_pred)
     return (tf.py_function(matthews_corrcoef, [tf.cast(y_true, tf.int32),  tf.cast(pred, tf.int32)], Tout = tf.float32))
 
 def mean_confidence_interval(data, confidence=0.95):
