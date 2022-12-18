@@ -91,7 +91,7 @@ def load_dataset_from_tfds(in_memory_ds, info, split, batch_size,
 # https://stackoverflow.com/questions/53404301/how-to-compute-spearman-correlation-in-tensorflow
 def spearman_rankcor(y_true, y_pred):
      return ( tf.py_function(scipy.stats.spearmanr, [tf.cast(y_pred, tf.int32), 
-                       tf.cast(y_true, tf.int32)], Tout = tf.float32) )[0]
+                       tf.cast(y_true, tf.int32)], Tout = tf.float32) )
 
 def scikit_mc(y_true, y_pred):
     print(y_true)
